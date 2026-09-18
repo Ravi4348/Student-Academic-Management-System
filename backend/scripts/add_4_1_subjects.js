@@ -1,4 +1,5 @@
-require('dotenv').config({ path: 'c:/Users/ravit/Desktop/Student Academic Management System/backend/.env' });
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
 const Subject = require('../src/modules/academic-master/models/Subject');
 const SubjectBranchMapping = require('../src/modules/academic-master/models/SubjectBranchMapping');

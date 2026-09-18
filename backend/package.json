@@ -8,8 +8,8 @@
     "dev": "nodemon src/server.js",
     "seed": "node src/utils/seed.js",
     "test": "jest",
-    "import:students": "node src/modules/results-backlogs/utils/import-backlogs.js \"C:/Users/ravit/Downloads/K&K+ BACKLOGS DATA.xlsx\" students",
-    "import:backlog-staging": "node src/modules/results-backlogs/utils/import-backlogs.js \"C:/Users/ravit/Downloads/K&K+ BACKLOGS DATA.xlsx\" staging"
+    "import:students": "node src/modules/results-backlogs/utils/import-backlogs.js \"../source-data/K&K+ BACKLOGS DATA.xlsx\" students",
+    "import:backlog-staging": "node src/modules/results-backlogs/utils/import-backlogs.js \"../source-data/K&K+ BACKLOGS DATA.xlsx\" staging"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
