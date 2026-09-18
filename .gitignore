@@ -19,3 +19,7 @@ scratch/uploads/*
 
 scripts/verification/
 scripts/migration/
+
+# Notice Uploads
+backend/uploads/notices/*
+!backend/uploads/notices/.gitkeep
