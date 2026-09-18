@@ -66,15 +66,25 @@ The system provides a cohesive environment where administrative staff manage the
 
 ```mermaid
 flowchart TD
-    U[Users] --> F[Frontend SPA (React)]
-    F --> R[React Router & Auth Provider]
-    R --> API[Backend REST API (Express)]
-    API --> M[Auth & Role Middleware]
-    M --> C[Controllers]
-    C --> S[Business Services]
-    S --> DB[(MongoDB)]
-    S --> N[Notification Service]
-    S --> A[Analytics Aggregation]
+    U["Users"]
+    F["Frontend SPA (React)"]
+    R["React Router & Auth Provider"]
+    API["Backend REST API (Express)"]
+    M["Auth & Role Middleware"]
+    C["Controllers"]
+    S["Business Services"]
+    DB[("MongoDB")]
+    N["Notification Service"]
+    A["Analytics Aggregation"]
+    U --> F
+    F --> R
+    R --> API
+    API --> M
+    M --> C
+    C --> S
+    S --> DB
+    S --> N
+    S --> A
 ```
 
 ---
