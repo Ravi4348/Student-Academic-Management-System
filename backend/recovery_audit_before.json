@@ -1,9 +1,0 @@
-{
-  "totalCurrentSemesterResultCount": 3916,
-  "numberOfPromptEngineeringRecords": 500,
-  "numberOfRecordsWithMissingSubjectIdReferences": 419,
-  "numberOfSoftSkillsRelatedRecords": 419,
-  "numberOfRecordsWhoseOriginalSubjectIdCanBeDeterministicallyRecovered": 500,
-  "numberOfDeletedRecordsThatCanBeReconstructedWithCompleteRequiredFields": 0,
-  "numberThatCannotBeReconstructedExactly": 1003
-}
