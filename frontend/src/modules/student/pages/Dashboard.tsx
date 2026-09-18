@@ -7,6 +7,8 @@ import { supportService, type RemedialClass } from '@/services/supportService';
 import { analyticsService } from '@/services/analyticsService';
 import { AlertTriangle, BookOpen, Users, Activity, UserCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { getAvatarUrl } from '@/utils/urlUtils';
 
 export const StudentDashboard = () => {
   const { user } = useAuth();
@@ -92,13 +94,12 @@ export const StudentDashboard = () => {
       <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100 shadow-sm overflow-hidden">
         <CardContent className="p-0">
           <div className="flex flex-col md:flex-row items-center gap-6 p-8">
-            <div className="flex-shrink-0 w-24 h-24 rounded-full bg-indigo-100 border-4 border-white shadow-sm flex items-center justify-center overflow-hidden">
-              {user?.avatar ? (
-                 <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                 <UserCircle className="w-16 h-16 text-indigo-400" />
-              )}
-            </div>
+            <Avatar className="flex-shrink-0 w-24 h-24 rounded-full bg-indigo-100 border-4 border-white shadow-sm overflow-hidden">
+              <AvatarImage src={getAvatarUrl(user?.avatarFileId || user?.avatar)} alt="Profile" />
+              <AvatarFallback className="bg-transparent flex items-center justify-center">
+                <UserCircle className="w-16 h-16 text-indigo-400" />
+              </AvatarFallback>
+            </Avatar>
             <div className="text-center md:text-left flex-1">
               <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{profile?.name || user?.firstName || 'Student Profile'}</h2>
               <div className="mt-2 flex flex-wrap gap-2 justify-center md:justify-start">
