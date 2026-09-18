@@ -1,0 +1,21 @@
+node_modules/
+.env
+.env.*
+dist/
+build/
+.DS_Store
+__pycache__/
+*.pyc
+
+# Development and backup folders
+.gemini/
+frontend_backup/
+
+# Scratch folder and uploads keep
+scratch/*
+!scratch/uploads/
+scratch/uploads/*
+!scratch/uploads/.gitkeep
+
+scripts/verification/
+scripts/migration/

@@ -1,0 +1,23 @@
+{
+  "totalSemesterResultCount": 3916,
+  "csm32ResultCount": 957,
+  "distinctCsm32Subjects": [
+    "DATA VISUALIZATION",
+    "DEEP LEARNING",
+    "DISASTER MANAGEMENT",
+    "MISSING_SUBJECT_REF",
+    "NATURAL LANGUAGE PROCESSING",
+    "NOSQL DATABASES",
+    "SOFTWARE TESTING METHODOLOGIES"
+  ],
+  "invalidPromptEngineeringCount": 0,
+  "missingSubjectCount": 919,
+  "duplicateCount": 0,
+  "unknownSubjectCount": 240,
+  "nanCount": 0,
+  "year2PortalResultStatus": "OK",
+  "year3PortalResultStatus": "OK",
+  "year4PortalResultStatus": "OK",
+  "ctpoResultPageStatus": "OK",
+  "studentProfileResultStatus": "OK"
+}
