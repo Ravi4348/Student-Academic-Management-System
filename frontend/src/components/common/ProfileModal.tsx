@@ -11,6 +11,7 @@ import { User as UserIcon, Mail, Shield, Briefcase, GraduationCap, Hash, Phone, 
 import { authService } from '@/services/authService';
 import { ImageCropper } from './ImageCropper';
 import { getAvatarUrl } from '@/utils/urlUtils';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -207,13 +208,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, use
                   {/* Avatar and Basic Info */}
                   <div className="flex flex-col items-center gap-4 bg-slate-50 p-6 rounded-xl border border-slate-100">
                     <div className="relative group">
-                      <div className="h-24 w-24 rounded-full bg-indigo-100 border-4 border-white flex items-center justify-center text-indigo-600 text-4xl font-bold overflow-hidden shadow-md">
-                        {formData.avatar ? (
-                          <img src={getAvatarUrl(formData.avatar)} alt="Profile" className="h-full w-full object-cover" />
-                        ) : (
-                          currentDisplayName?.charAt(0)?.toUpperCase() || 'U'
-                        )}
-                      </div>
+                      <Avatar className="h-24 w-24 rounded-full bg-indigo-100 border-4 border-white shadow-md text-indigo-600 text-4xl font-bold overflow-hidden">
+                        <AvatarImage src={getAvatarUrl(formData.avatar)} alt="Profile" />
+                        <AvatarFallback className="bg-transparent text-indigo-600">
+                          {currentDisplayName?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
                       {isEditing && (
                         <button 
                           onClick={() => fileInputRef.current?.click()}

@@ -49,7 +49,10 @@ export const authService = {
 
   async updateProfile(data: FormData | { fullName?: string; email?: string; phoneNumber?: string; avatar?: string | null }): Promise<any> {
     const baseURL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1').replace('/v1', '');
-    const response = await apiClient.put(`${baseURL}/auth/profile`, data);
+    const isFormData = data instanceof FormData;
+    const response = await apiClient.put(`${baseURL}/auth/profile`, data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    });
     return response.data;
   }
 };

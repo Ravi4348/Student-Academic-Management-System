@@ -39,7 +39,13 @@ class AuthService {
       token,
       user: {
         id: user._id,
+        username: user.username,
         role: user.role,
+        fullName: user.fullName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        avatarFileId: user.avatarFileId,
+        avatar: user.avatar,
         scopeRef: user.scopeRef,
         scope: user.scope,
       }
