@@ -11,41 +11,44 @@ Educational institutions often struggle with fragmented academic data spread acr
 - Poor communication regarding remedial support and guest lectures.
 - Lack of role-specific insights for HODs, Coordinators, and CTPOs to administer academic protocols effectively.
 
-## 3. Solution
-This platform offers a robust, centralized MERN-based solution that unifies academic data management. It provides a secure, role-based ecosystem where students can access their performance metrics, while faculty and administrators receive advanced diagnostic tools to monitor risks, organize remedial support, and track overall institutional performance. Automated notifications and structured workflows ensure that critical academic interventions are communicated promptly and accurately.
+## 3. Objectives
+- Consolidate academic performance metrics into a single source of truth.
+- Enable targeted academic support through Remedial Classes and Guest Lectures.
+- Implement a rigid Role-Based Access Control (RBAC) to enforce data privacy and security.
+- Automate result extraction and importation pipelines.
+- Empower educators with real-time risk assessment dashboards.
 
-## 4. Technology Stack
+## 4. Key Features
+- **Centralized Dashboard**: Role-specific views focusing on relevant KPIs and tasks.
+- **Risk Assessment Module**: Proactively flags students based on performance metrics.
+- **Result Processing**: Automated PDF ingestion and transformation via a dedicated Python service.
+- **Backlog Management**: Clear tracking of active vs. cleared backlogs.
+- **Academic Support Scheduling**: Built-in workflows for organizing Guest Lectures and Remedial Classes.
+- **Event-Driven Notifications**: Role-aware bell notifications ensuring prompt action.
+- **Secure File Storage**: GridFS integration for avatar and profile management.
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Frontend | React | UI |
-| Frontend Language | JavaScript / JSX | Application development |
-| UI | shadcn/ui | UI components |
-| Styling | Tailwind CSS | Styling |
-| Build Tool | Vite | Frontend build |
-| Routing | React Router | Navigation |
-| Charts | Recharts | Analytics visualization |
-| Backend | Node.js | Runtime |
-| API | Express.js | REST API |
-| Backend Language | JavaScript | Server development |
-| Database | MongoDB | Data storage |
-| ODM | Mongoose | MongoDB access |
-| File Storage | MongoDB GridFS | Persistent storage for avatars/media |
-| Authentication | JWT | Authentication |
-| Password Security | bcrypt | Password hashing |
-| Result Processing | Python | PDF/result processing only |
+## 5. Technology Stack
+| Layer | Technology |
+|---|---|
+| Frontend Framework | React |
+| Frontend Language | JavaScript / JSX |
+| Build Tool | Vite |
+| Styling | Tailwind CSS |
+| UI Components | shadcn/ui / Radix UI |
+| Routing | React Router |
+| Charts & Visualization | Recharts |
+| Backend Runtime | Node.js |
+| API Framework | Express.js |
+| Backend Language | JavaScript |
+| Database | MongoDB |
+| ODM | Mongoose |
+| Media Storage | MongoDB GridFS (Avatars) |
+| Authentication | JWT |
+| Password Security | bcrypt |
+| Data Storage & Upload | Multer |
+| Result Processing | Python |
 
-## 5. Languages Used
-
-### Application Languages
-- JavaScript
-- JSX
-
-### Supporting Processing Language
-- Python — used only by the result-processing pipeline for PDF extraction.
-
-## System Architecture Flowchart
-
+## 6. System Architecture
 ```mermaid
 flowchart TD
     Users["Users"]
@@ -75,33 +78,32 @@ flowchart TD
     PythonProcessor -->|"Structured result data"| MongoDB
 ```
 
-## Overall System Workflow
-
+## 7. Complete System Workflow
 ```mermaid
 flowchart TD
     AppOpen["Application Open"]
     LoginPage["Login Page"]
     CredsValid{"Credentials Valid?"}
     JWTToken["JWT Token"]
-    FetchUser["Fetch Authenticated User"]
-    DetermineRole["Determine Role"]
-    RoleDashboard["Role Dashboard"]
+    FetchUser["/auth/me"]
+    DetermineRole["Role Detection"]
+    RoleDashboard["Role-Based Dashboard"]
     Admin["Admin"]
     Principal["Principal"]
     HOD["HOD"]
     Coordinator["Coordinator"]
     CTPO["CTPO"]
     Student["Student"]
-    InteractModules["Interact with Modules"]
+    InteractModules["Module"]
     APIRequest["API Request"]
-    AuthScope["Authentication + Scope Validation"]
+    AuthScope["Authorization"]
+    Validation["Validation"]
     Controller["Controller"]
-    BusinessService["Business Service"]
-    MongoDB["MongoDB"]
-    NotifsResults["Notifications / Analytics / Results"]
-    JSONResponse["JSON Response"]
-    ReactState["React State Update"]
-    UIRender["UI Render"]
+    BusinessService["Service"]
+    MongoDB["Database"]
+    NotifsResults["Notifications / Analytics"]
+    JSONResponse["Response"]
+    UIRender["UI Update"]
 
     AppOpen --> LoginPage
     LoginPage --> CredsValid
@@ -124,122 +126,125 @@ flowchart TD
     Student --> InteractModules
     InteractModules --> APIRequest
     APIRequest --> AuthScope
-    AuthScope --> Controller
+    AuthScope --> Validation
+    Validation --> Controller
     Controller --> BusinessService
     BusinessService --> MongoDB
     BusinessService --> NotifsResults
     NotifsResults --> JSONResponse
     MongoDB --> JSONResponse
-    JSONResponse --> ReactState
-    ReactState --> UIRender
+    JSONResponse --> UIRender
 ```
 
-## Authentication / Authorization Workflow
-
+## 8. Authentication & RBAC
+Authentication is facilitated by JWT with password verification powered by bcrypt.
 ```mermaid
 flowchart TD
     Login["Login"]
-    ValidateCreds["Validate credentials"]
-    BcryptVerify["bcrypt/password verification"]
-    JWTGen["JWT generation"]
-    AuthContext["Authenticated user context"]
-    RoleDet["Role determination"]
-    RBAC["RBAC"]
-    ScopeVal["Scope validation"]
-    AuthAccess["Authorized module access"]
+    ValidateCreds["Credentials Validation"]
+    JWTGen["JWT Token Issued"]
+    AuthContext["Authenticated User"]
+    RoleDet["Role Detection"]
+    RBAC["Role Authorization"]
+    ScopeVal["Scope Validation"]
+    Dashboard["Dashboard Access"]
 
     Login --> ValidateCreds
-    ValidateCreds --> BcryptVerify
-    BcryptVerify --> JWTGen
+    ValidateCreds --> JWTGen
     JWTGen --> AuthContext
     AuthContext --> RoleDet
     RoleDet --> RBAC
     RBAC --> ScopeVal
-    ScopeVal --> AuthAccess
+    ScopeVal --> Dashboard
 ```
-*Security Note: The system utilizes role-based access control (RBAC) paired with scope validation to ensure strict student identity protection. Students are rigorously isolated to only their own data.*
+*Security Note: The system utilizes role-based access control (RBAC) paired with scope validation to ensure strict student identity protection and precise departmental data siloing.*
 
-## Role Workflow
+## 9. Roles & Permissions
+The application serves exactly six roles, ensuring structured data access:
+1. **Admin**: System-level scope. Full access to imports, configurations, master data, and user management.
+2. **Principal**: Campus-level scope. Aggregated analytics, performance tracking, and overarching administrative insights.
+3. **HOD**: Year-level scope. Departmental analytics, oversight of results, backlogs, and academic support activities.
+4. **Coordinator**: Academic support scope. Manages execution of remedial classes, guest lectures, and student attendance tracking.
+5. **CTPO (Class Teacher)**: Branch/Class-level scope. Assesses direct student risks, performance, and localized class analytics.
+6. **Student**: Individual scope. Strictly isolated access to their personal performance, backlogs, and relevant notifications.
 
+## 10. Role-by-Role Workflows
+
+### Six-Role Routing Workflow
 ```mermaid
 flowchart TD
-    Admin["Admin: System Config & Audits"]
+    Login["Login"]
+    Admin["Admin"]
+    Principal["Principal"]
+    HOD["HOD"]
+    Coordinator["Coordinator"]
+    CTPO["CTPO"]
+    Student["Student"]
+
+    Login --> Admin
+    Login --> Principal
+    Login --> HOD
+    Login --> Coordinator
+    Login --> CTPO
+    Login --> Student
+```
+
+### Role Workflow & Responsibilities
+```mermaid
+flowchart TD
+    Admin["Admin: System Config & Imports"]
     Principal["Principal: Global Overview & Analytics"]
-    HOD["HOD: Departmental Analytics & Approvals"]
+    HOD["HOD: Departmental Analytics & Academic Support Oversight"]
     Coordinator["Coordinator: Class Monitoring & Remedial Scheduling"]
     CTPO["CTPO: Placements & Risk Assessment"]
     Student["Student: Results, Attendance & Backlogs"]
-
-    Admin --- Principal
-    Principal --- HOD
-    HOD --- Coordinator
-    Coordinator --- CTPO
-    CTPO --- Student
 ```
 
-## Student Academic Workflow
-
+### HOD Workflow
+The HOD workflow is strictly constrained to the following menu. Notifications are inherently integrated into the Guest Lectures workflows and the generic notification bell is intentionally hidden.
 ```mermaid
 flowchart TD
-    StudentLogin["Student Login"]
+    HODLogin["HOD Login"]
     Dashboard["Dashboard"]
-    AcadInfo["Academic Information"]
+    Performance["Performance"]
     Results["Results"]
-    SemSelection["Semester Selection"]
-    SubjectResults["Subject Results"]
-    SGPA["SGPA"]
-    CGPA["CGPA"]
     Backlogs["Backlogs"]
-    Attendance["Attendance"]
-    RemedialClasses["Remedial Classes"]
-    GuestLectures["Guest Lectures"]
+    Risk["Risk"]
+    GuestLecturesNav["Guest Lectures Menu"]
+    GuestLectures["Guest Lectures Section"]
+    RemedialClasses["Remedial Classes Section"]
+
+    HODLogin --> Dashboard
+    HODLogin --> Performance
+    HODLogin --> Results
+    HODLogin --> Backlogs
+    HODLogin --> Risk
+    HODLogin --> GuestLecturesNav
+    GuestLecturesNav --> GuestLectures
+    GuestLecturesNav --> RemedialClasses
+```
+
+### Student Academic Workflow
+```mermaid
+flowchart TD
+    StudentLogin["Login"]
+    Dashboard["Student Dashboard"]
+    Profile["Profile"]
+    Results["Results"]
+    SGPA["SGPA/CGPA"]
+    Backlogs["Backlogs"]
     Notifications["Notifications"]
 
     StudentLogin --> Dashboard
-    Dashboard --> AcadInfo
+    Dashboard --> Profile
     Dashboard --> Results
-    Results --> SemSelection
-    SemSelection --> SubjectResults
-    SubjectResults --> SGPA
-    SubjectResults --> CGPA
+    Results --> SGPA
     Dashboard --> Backlogs
-    Dashboard --> Attendance
-    Dashboard --> RemedialClasses
-    Dashboard --> GuestLectures
     Dashboard --> Notifications
 ```
 
-## Result Processing Workflow
-
-```mermaid
-flowchart TD
-    PDFUpload["PDF Upload"]
-    NodeExpress["Node.js / Express"]
-    FileHandling["File handling"]
-    PythonProcessor["Python PDF Processor"]
-    ExtractData["Extract Result Data"]
-    Validate["Validate"]
-    MapSubjects["Map Subjects/Semesters"]
-    StoreData["Store Structured Data"]
-    MongoDB["MongoDB"]
-    ResultsAPI["Results API"]
-    ReactUI["React Results UI"]
-
-    PDFUpload --> NodeExpress
-    NodeExpress --> FileHandling
-    FileHandling --> PythonProcessor
-    PythonProcessor --> ExtractData
-    ExtractData --> Validate
-    Validate --> MapSubjects
-    MapSubjects --> StoreData
-    StoreData --> MongoDB
-    MongoDB --> ResultsAPI
-    ResultsAPI --> ReactUI
-```
-
-## SGPA / CGPA Workflow
-Academic calculations are derived from subject credits and grade points. Semesters calculate SGPA individually, while cumulative metrics track across the entire student lifecycle based on the official source of truth in the database.
-
+## 11. Academic Data Flow
+Academic calculations are derived directly from validated subject credits and grade points.
 ```mermaid
 flowchart TD
     FetchResults["Fetch Subject Results"]
@@ -261,74 +266,136 @@ flowchart TD
     CalcCGPA --> SaveDB
 ```
 
-## Avatar / Profile Workflow
-Avatars are managed securely through MongoDB GridFS.
+## 12. Results / SGPA / CGPA
+Results are displayed historically per semester. SGPA is aggregated individually, whereas CGPA provides the cumulative metric based strictly on database-derived facts.
 
+## 13. Backlogs
+The system automatically detects, isolates, and tracks student backlogs, allowing Coordinators and CTPOs to effectively organize subsequent support without conflating them with regular curriculum performance.
+
+## 14. Guest Lectures & 15. Remedial Classes
+Academic support forms a critical pillar. The Coordinator schedules these events.
 ```mermaid
 flowchart TD
-    ProfileImage["Profile Image Upload"]
-    FormData["FormData"]
-    Express["Express Route"]
-    MulterStorage["Multer Memory Storage"]
-    GridFS["MongoDB GridFS"]
-    AvatarId["avatarFileId in User Document"]
-    AuthEndpoint["Authenticated Avatar Endpoint"]
-    ReactAvatar["React Avatar Component"]
-    ProfileUI["Profile / Topbar / Dashboard UI"]
+    Coordinator["Coordinator"]
+    CreateEvent["Create/Schedule Event"]
+    EventRouter{"Guest Lecture or Remedial Class?"}
+    StatusUpdate["Status Update"]
+    NotifGen["Notification Generation"]
+    RelevantUsers["Relevant Users"]
 
-    ProfileImage --> FormData
-    FormData --> Express
-    Express --> MulterStorage
-    MulterStorage --> GridFS
+    Coordinator --> CreateEvent
+    CreateEvent --> EventRouter
+    EventRouter --> StatusUpdate
+    StatusUpdate --> NotifGen
+    NotifGen --> RelevantUsers
+```
+
+## 16. Notifications
+The notification subsystem intelligently routes alerts based on roles:
+- **Student**: Access via topbar bell, navigates to `/student/notifications`.
+- **Coordinator**: Access via topbar bell, navigates to `/coordinator/notifications`.
+- **CTPO (Class Teacher)**: Access via topbar bell, navigates precisely to `/ctpo/notices`.
+- **Admin**: Access via topbar bell, navigates to `/admin/notices`.
+- **Principal**: Handled natively based on scope logic.
+- **HOD**: The bell is explicitly hidden; alerts strictly trigger through relevant component sub-menus like Guest Lectures.
+
+## 17. Analytics
+```mermaid
+flowchart TD
+    Dashboard["Dashboard"]
+    AnalyticsAPI["Analytics API"]
+    AnalyticsService["Analytics Service"]
+    MongoDB["MongoDB Aggregation"]
+    KPI["KPI/Chart Data"]
+    Recharts["Recharts Visualization"]
+
+    Dashboard --> AnalyticsAPI
+    AnalyticsAPI --> AnalyticsService
+    AnalyticsService --> MongoDB
+    MongoDB --> KPI
+    KPI --> Recharts
+```
+
+## 18. Profile & Avatar
+Profile components natively integrate with MongoDB GridFS for secure rendering.
+```mermaid
+flowchart TD
+    Profile["Profile"]
+    Edit["Edit"]
+    Upload["Upload/Crop Avatar"]
+    GridFS["GridFS"]
+    AvatarId["User.avatarFileId"]
+    AuthRetrieval["Authenticated Avatar Retrieval"]
+    UI["Topbar/Profile/Dashboard"]
+
+    Profile --> Edit
+    Edit --> Upload
+    Upload --> GridFS
     GridFS --> AvatarId
-    AvatarId --> AuthEndpoint
-    AuthEndpoint --> ReactAvatar
-    ReactAvatar --> ProfileUI
+    AvatarId --> AuthRetrieval
+    AuthRetrieval --> UI
 ```
 
-## Notification Workflow
-The system features event-driven notifications to keep students informed of critical academic support opportunities.
+## 19. Result Import
+Admins can batch import data. The Result Import UI securely fetches valid academic semesters, deduplicating records so only the standard mapping (`1-1`, `1-2`, `2-1`, `2-2`, `3-1`, `3-2`, `4-1`) is presented to the Administrator.
 
-```mermaid
-flowchart TD
-    Event["Event Trigger (e.g. Remedial Class Created/Updated)"]
-    NotifService["Notification Service"]
-    Recipients["Identify Eligible Recipients"]
-    MongoDB["Store in MongoDB"]
-    NotifUI["Notification UI Dashboard"]
+## 20. API Architecture
+Express.js routes employ unified middleware protecting endpoints by both authentication (`token validation`) and precise authorization (`RBAC/Scope bounds`). Service layers extract business logic to maintain high modularity.
 
-    Event --> NotifService
-    NotifService --> Recipients
-    Recipients --> MongoDB
-    MongoDB --> NotifUI
-```
+## 21. Database Architecture
+MongoDB is deployed using Mongoose with carefully isolated models (`User`, `Student`, `SemesterResult`, `Event`, `Notification`, etc.). GridFS is utilized explicitly for BLOB retention (e.g., Avatars).
 
-## Analytics Workflow
+## 22. Frontend Architecture
+The frontend leverages a purely JavaScript Vite/React stack. Tailored shadcn/ui components ensure highly aesthetic layouts, governed by React Router DOM for role-guarded access paths.
 
-```mermaid
-flowchart TD
-    AcadData["Academic Data"]
-    AggServices["Aggregation Services"]
-    Metrics["Performance Metrics"]
-    Risk["Risk / Backlog / Attendance Analytics"]
-    DashCharts["Dashboard Charts"]
-    RoleUI["Role-specific UI"]
+## 23. Backend Architecture
+Node.js processes asynchronous requests, relying on JavaScript implementations for scalable event handling, aggregation pipelines, and robust JWT lifecycles. 
 
-    AcadData --> AggServices
-    AggServices --> Metrics
-    Metrics --> Risk
-    Risk --> DashCharts
-    DashCharts --> RoleUI
-```
-
-## Project Structure
+## 24. Project Structure
 ```text
 project/
 ├── backend/               # Node.js Express backend and API logic
-├── frontend/              # React/Vite JavaScript frontend application
-├── result-processor/      # Python utility for PDF parsing and data extraction
-├── source-data/           # Original seed and curriculum source files
-├── reference/             # Project documentation and specifications
+│   ├── src/               # Application source code
+│   ├── uploads/           # Ephemeral storage buffers
+│   └── package.json       # Backend configurations
+├── frontend/              # Vite/React JavaScript application
+│   ├── src/               # React components, contexts, and modules
+│   └── package.json       # Frontend configurations
+├── result-processor/      # Python utility for PDF parsing and extraction
+├── source-data/           # Baseline seed and reference data
+├── reference/             # Original institutional documentation
+├── .env.example
 ├── .gitignore
 └── README.md
 ```
+
+## 25. Local Setup
+1. **Clone the repository.**
+2. **Install Backend Dependencies:** `cd backend && npm install`
+3. **Install Frontend Dependencies:** `cd frontend && npm install`
+4. **Environment:** Copy `.env.example` to `.env` in the backend and provide valid MongoDB credentials.
+5. **Start:**
+   - Run backend: `npm run dev`
+   - Run frontend: `npm run dev`
+
+## 26. Docker/Deployment
+The application relies on standard Node.js Docker implementations mapping Vite build processes for static asset delivery and Express exposing REST services on specified container ports.
+
+## 27. Testing
+The application employs rigorous Jest testing for the Node.js backend. All critical controllers and services are tested against mock databases. 
+Run backend tests:
+```bash
+cd backend
+npm test
+```
+
+## 28. Security
+- Complete route protection against unauthorized roles.
+- Hardened scope boundaries to prevent vertical/horizontal data access leaks.
+- Secure hashing of all persisted credentials.
+- Guarded GridFS media streams ensuring unauthenticated requests cannot scrape user data.
+
+## 29. Future Scope
+- Integration with external predictive models for enhanced risk assessment.
+- Mobile application bridging for real-time offline alerts.
+- Extended audit log and export functionalities for broader compliance reporting.
