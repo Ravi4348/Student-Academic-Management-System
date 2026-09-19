@@ -1,408 +1,334 @@
 # Academic Engagement, Student Risk & Academic Support Management System
 
-An end-to-end full-stack platform designed for higher education institutions to manage academic master data, track student performance, identify at-risk students, and facilitate academic support such as remedial classes and guest lectures.
+## 1. Project Overview
+The Student Academic Management System is a comprehensive platform designed to streamline and centralize academic administration. It provides role-based access for students, coordinators, department heads, and administrators to effectively monitor student performance, track attendance, identify at-risk students, and coordinate academic support programs such as remedial classes and guest lectures. By consolidating fragmented academic data, the system empowers institutions to proactively support student success through actionable analytics and event-driven notifications.
 
-The system replaces fragmented spreadsheets with a centralized database, offering role-based dashboards that provide tailored insights to Administrators, Principals, HODs, Coordinators, CTPOs, Faculty, and Students. It solves the critical problem of tracking academic progression across multiple branches and semesters, empowering faculty and management to intervene early for struggling students while ensuring seamless academic operations.
+## 2. Problem Statement
+Educational institutions often struggle with fragmented academic data spread across disparate systems, making it difficult to maintain a holistic view of student performance. Key challenges include:
+- Fragmented and delayed result management.
+- Inefficient monitoring of active backlogs and attendance.
+- Delayed identification of at-risk students who need immediate intervention.
+- Poor communication regarding remedial support and guest lectures.
+- Lack of role-specific insights for HODs, Coordinators, and CTPOs to administer academic protocols effectively.
 
----
+## 3. Solution
+This platform offers a robust, centralized MERN-based solution that unifies academic data management. It provides a secure, role-based ecosystem where students can access their performance metrics, while faculty and administrators receive advanced diagnostic tools to monitor risks, organize remedial support, and track overall institutional performance. Automated notifications and structured workflows ensure that critical academic interventions are communicated promptly and accurately.
 
-## Table of Contents
-1. [Overview](#overview)
-2. [Key Features](#key-features)
-3. [Technology Stack](#technology-stack)
-4. [System Architecture](#system-architecture)
-5. [Overall Workflow](#overall-workflow)
-6. [Authentication](#authentication)
-7. [Roles & Permissions](#roles--permissions)
-8. [Role Workflows](#role-workflows)
-9. [Academic Data Flow](#academic-data-flow)
-10. [Core Modules](#core-modules)
-11. [Dashboards & Analytics](#dashboards--analytics)
-12. [API Architecture](#api-architecture)
-13. [Database Architecture](#database-architecture)
-14. [Frontend Architecture](#frontend-architecture)
-15. [Backend Architecture](#backend-architecture)
-16. [Security](#security)
-17. [Project Structure](#project-structure)
-18. [Installation & Local Setup](#installation--local-setup)
-19. [Docker Deployment](#docker-deployment)
-20. [Testing](#testing)
-21. [Future Scope](#future-scope)
+## 4. Technology Stack
 
----
+| Layer | Technology | Purpose |
+|---|---|---|
+| Frontend | React | UI |
+| Frontend Language | JavaScript / JSX | Application development |
+| UI | shadcn/ui | UI components |
+| Styling | Tailwind CSS | Styling |
+| Build Tool | Vite | Frontend build |
+| Routing | React Router | Navigation |
+| Charts | Recharts | Analytics visualization |
+| Backend | Node.js | Runtime |
+| API | Express.js | REST API |
+| Backend Language | JavaScript | Server development |
+| Database | MongoDB | Data storage |
+| ODM | Mongoose | MongoDB access |
+| File Storage | MongoDB GridFS | Persistent storage for avatars/media |
+| Authentication | JWT | Authentication |
+| Password Security | bcrypt | Password hashing |
+| Result Processing | Python | PDF/result processing only |
 
-## Overview
-The system provides a cohesive environment where administrative staff manage the foundational academic hierarchy (Campuses, Branches, Semesters, Subjects, and mappings). Once established, faculty upload and track marks and results, while students access their academic profiles, SGPA/CGPA standing, and backlog history. Management roles (Principals, HODs) access high-level analytical dashboards to monitor institutional health, while Coordinators and CTPOs arrange remedial classes and guest lectures to support student success.
+## 5. Languages Used
 
-## Key Features
-- **Secure Authentication & RBAC**: JWT-based login with strict role-based access control.
-- **Academic Master Management**: Complete CRUD for Campuses, Branches, Academic Years, Semesters, and Subjects.
-- **Dynamic Subject Mapping**: Highly flexible Subject-to-Branch-Semester mappings handling diverse academic cohorts seamlessly.
-- **Results & Backlogs Tracking**: Robust tracking of historical SGPA/CGPA, current marks, and uncleared backlogs.
-- **Academic Support**: End-to-end workflows for scheduling and completing Guest Lectures and Remedial Classes.
-- **Real-Time Analytics**: Visual dashboards offering insights into risk distribution, academic performance, and branch metrics.
-- **Notifications**: Automated in-app notifications for task assignments and academic updates.
-- **Responsive UI**: Built with React, Tailwind CSS, and Radix UI primitives.
+### Application Languages
+- JavaScript
+- JSX
 
----
+### Supporting Processing Language
+- Python — used only by the result-processing pipeline for PDF extraction.
 
-## Technology Stack
-
-| Layer | Technologies | Purpose |
-|------|--------------|---------|
-| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS, Radix UI | Fast, accessible, and responsive user interface |
-| **Backend** | Node.js, Express.js | High-performance RESTful API server |
-| **Database** | MongoDB, Mongoose | Flexible, schema-driven NoSQL data persistence |
-| **Charts** | Recharts | Dynamic analytics and data visualization |
-| **Authentication** | JWT, bcrypt | Secure stateless sessions and password hashing |
-| **Validation** | express-validator | Strong input sanitization and validation |
-| **PDF Generation** | jsPDF, html2canvas | Exporting reports and analytics |
-| **Testing** | Jest, Supertest | Unit and integration testing |
-| **Deployment** | Docker, Docker Compose | Containerized application deployment |
-
----
-
-## System Architecture
+## System Architecture Flowchart
 
 ```mermaid
 flowchart TD
-    U["Users"]
-    F["Frontend SPA (React)"]
-    R["React Router & Auth Provider"]
-    API["Backend REST API (Express)"]
-    M["Auth & Role Middleware"]
-    C["Controllers"]
-    S["Business Services"]
-    DB[("MongoDB")]
-    N["Notification Service"]
-    A["Analytics Aggregation"]
-    U --> F
-    F --> R
-    R --> API
-    API --> M
-    M --> C
-    C --> S
-    S --> DB
-    S --> N
-    S --> A
-```
+    Users["Users"]
+    ReactFrontend["React Frontend"]
+    ReactRouterAuth["React Router / Auth Provider"]
+    ExpressREST["Express REST API"]
+    AuthRBAC["Authentication / RBAC"]
+    Controllers["Controllers"]
+    Services["Services"]
+    MongoDB["MongoDB"]
+    NotificationsAnalytics["Notifications / Analytics"]
+    JSONResponse["JSON Response"]
+    ReactUI["React UI"]
+    PythonProcessor["Python Result Processor"]
 
----
-
-## Overall Workflow
-
-```mermaid
-flowchart TD
-    A[Application Open] --> B[Login Page]
-    B --> C{Credentials Valid?}
-    C -->|No| B
-    C -->|Yes| D[Issue JWT Token]
-    D --> E[Fetch /auth/me]
-    E --> F{Determine Role}
-    F --> G[Admin Dashboard]
-    F --> H[Principal Dashboard]
-    F --> I[HOD Dashboard]
-    F --> J[Coordinator Dashboard]
-    F --> K[CTPO Dashboard]
-    F --> L[Student Dashboard]
+    Users --> ReactFrontend
+    ReactFrontend --> ReactRouterAuth
+    ReactRouterAuth --> ExpressREST
+    ExpressREST --> AuthRBAC
+    AuthRBAC --> Controllers
+    Controllers --> Services
+    Services --> MongoDB
+    Services --> NotificationsAnalytics
+    Services --> JSONResponse
+    JSONResponse --> ReactUI
     
-    G & H & I & J & K & L --> M[Interact with Modules]
-    M --> N[API Request with Bearer Token]
-    N --> O[Backend Auth & Scope Validation]
-    O --> P[Database Read/Write]
-    P --> Q[Generate Notifications/Analytics]
-    Q --> R[Return JSON Response]
-    R --> S[Update React State / Re-render]
+    PythonProcessor -->|"Structured result data"| MongoDB
 ```
 
----
+## Overall System Workflow
 
-## Authentication
-
-Authentication is entirely stateless using JSON Web Tokens (JWT).
-
-```mermaid
-flowchart LR
-    L[Login Form] -->|POST /auth/login| A[Auth API]
-    A -->|Validate Credentials| DB[(Users DB)]
-    DB -->|Verified| JWT[Generate JWT]
-    JWT -->|Return Token| UI[Frontend Context]
-    UI -->|GET /auth/me| ME[Fetch Profile]
-    ME --> R[Role-Based Route]
-```
-- **Login**: Users authenticate with email/password. 
-- **Token Handling**: JWT is stored securely on the client and attached as a `Bearer` token to the `Authorization` header of all protected requests.
-- **Identity Resolution**: `/auth/me` retrieves the user's role and scopes (e.g., `branchId`, `campusId`) to dynamically render navigation and restrict data access.
-
----
-
-## Roles & Permissions
-
-| Role | Dashboard | Main Modules | Main Actions | Data Scope |
-| ---- | --------- | ------------ | ------------ | ---------- |
-| **Admin** | Admin Dashboard | Campuses, Branches, Subjects, Users | Master Data CRUD, User Provisioning | Global |
-| **Principal** | Principal Dashboard | Overview, Analytics, Campuses | View institutional performance, risk analysis | Campus-wide |
-| **HOD** | HOD Dashboard | Analytics, Students, Backlogs | Monitor department performance, assign support | Branch-specific |
-| **Coordinator** | Coordinator Dashboard | Remedial, Guest Lectures, Backlogs | Schedule/complete academic support | Branch/Section-specific |
-| **CTPO** | CTPO Dashboard | Placements, Student Lists | Monitor eligible students, training modules | Branch-specific |
-| **Student** | Student Dashboard | Profile, Results, Backlogs | View grades, attendance, notifications | Self |
-
----
-
-## Role Workflows
-
-### Admin Workflow
-Admins establish the structural foundation of the application.
 ```mermaid
 flowchart TD
-    Login --> D[Admin Dashboard]
-    D --> CM[Campus Management]
-    D --> BM[Branch & Semester Setup]
-    D --> SM[Subject Mapping]
-    D --> UM[User Provisioning]
-    SM --> UI[Subjects Display Deduplication]
-    UI --> DB[(MongoDB)]
+    AppOpen["Application Open"]
+    LoginPage["Login Page"]
+    CredsValid{"Credentials Valid?"}
+    JWTToken["JWT Token"]
+    FetchUser["Fetch Authenticated User"]
+    DetermineRole["Determine Role"]
+    RoleDashboard["Role Dashboard"]
+    Admin["Admin"]
+    Principal["Principal"]
+    HOD["HOD"]
+    Coordinator["Coordinator"]
+    CTPO["CTPO"]
+    Student["Student"]
+    InteractModules["Interact with Modules"]
+    APIRequest["API Request"]
+    AuthScope["Authentication + Scope Validation"]
+    Controller["Controller"]
+    BusinessService["Business Service"]
+    MongoDB["MongoDB"]
+    NotifsResults["Notifications / Analytics / Results"]
+    JSONResponse["JSON Response"]
+    ReactState["React State Update"]
+    UIRender["UI Render"]
+
+    AppOpen --> LoginPage
+    LoginPage --> CredsValid
+    CredsValid -->|"No"| LoginPage
+    CredsValid -->|"Yes"| JWTToken
+    JWTToken --> FetchUser
+    FetchUser --> DetermineRole
+    DetermineRole --> RoleDashboard
+    RoleDashboard --> Admin
+    RoleDashboard --> Principal
+    RoleDashboard --> HOD
+    RoleDashboard --> Coordinator
+    RoleDashboard --> CTPO
+    RoleDashboard --> Student
+    Admin --> InteractModules
+    Principal --> InteractModules
+    HOD --> InteractModules
+    Coordinator --> InteractModules
+    CTPO --> InteractModules
+    Student --> InteractModules
+    InteractModules --> APIRequest
+    APIRequest --> AuthScope
+    AuthScope --> Controller
+    Controller --> BusinessService
+    BusinessService --> MongoDB
+    BusinessService --> NotifsResults
+    NotifsResults --> JSONResponse
+    MongoDB --> JSONResponse
+    JSONResponse --> ReactState
+    ReactState --> UIRender
 ```
 
-### Principal Workflow
-Principals monitor macro-level institutional health.
+## Authentication / Authorization Workflow
+
 ```mermaid
 flowchart TD
-    Login --> D[Principal Dashboard]
-    D --> O[Campus Overview]
-    D --> R[Risk Distribution]
-    D --> P[Academic Performance KPIs]
-    R & P --> DB[(Analytics DB Aggregation)]
+    Login["Login"]
+    ValidateCreds["Validate credentials"]
+    BcryptVerify["bcrypt/password verification"]
+    JWTGen["JWT generation"]
+    AuthContext["Authenticated user context"]
+    RoleDet["Role determination"]
+    RBAC["RBAC"]
+    ScopeVal["Scope validation"]
+    AuthAccess["Authorized module access"]
+
+    Login --> ValidateCreds
+    ValidateCreds --> BcryptVerify
+    BcryptVerify --> JWTGen
+    JWTGen --> AuthContext
+    AuthContext --> RoleDet
+    RoleDet --> RBAC
+    RBAC --> ScopeVal
+    ScopeVal --> AuthAccess
 ```
+*Security Note: The system utilizes role-based access control (RBAC) paired with scope validation to ensure strict student identity protection. Students are rigorously isolated to only their own data.*
 
-### Coordinator Workflow
-Coordinators take actionable steps to remediate at-risk students.
-```mermaid
-flowchart LR
-    Login --> D[Coordinator Dashboard]
-    D --> B[View Backlogs]
-    D --> R[Schedule Remedial]
-    D --> G[Schedule Guest Lecture]
-    R & G --> C[Mark as Completed]
-    C --> N[Trigger Notifications]
-```
+## Role Workflow
 
-### Student Workflow
-Students have a read-only view of their progression.
-```mermaid
-flowchart TD
-    Login --> D[Student Dashboard]
-    D --> P[View Profile / Avatar]
-    D --> M[View Marks & Results]
-    D --> S[View SGPA / CGPA]
-    D --> B[Track Backlogs]
-```
-
----
-
-## Academic Data Flow
-
-The system relies on a rigorous academic hierarchy.
 ```mermaid
 flowchart TD
-    C[Campus] --> B[Branch]
-    B --> Y[Academic Year]
-    Y --> S[Semester]
-    S --> SM[SubjectBranchMapping]
-    SUB[Subject] --> SM
-    STU[Student] --> B
-    STU --> SM
-    SM --> R[SemesterResult / Marks]
+    Admin["Admin: System Config & Audits"]
+    Principal["Principal: Global Overview & Analytics"]
+    HOD["HOD: Departmental Analytics & Approvals"]
+    Coordinator["Coordinator: Class Monitoring & Remedial Scheduling"]
+    CTPO["CTPO: Placements & Risk Assessment"]
+    Student["Student: Results, Attendance & Backlogs"]
+
+    Admin --- Principal
+    Principal --- HOD
+    HOD --- Coordinator
+    Coordinator --- CTPO
+    CTPO --- Student
 ```
 
----
-
-## Core Modules
-
-### Subjects
-The `SubjectBranchMapping` model dictates curriculum offerings. The Admin Subjects UI employs robust frontend deduplication to ensure the same logical subject (sharing a normalized name) is displayed only once per `Branch + Year + Semester`, preserving database integrity while hiding cohort-specific duplicate codes (e.g. `R23` vs `NEW-CAI`). Laboratory subjects are intentionally preserved as distinct entries.
-
-### Results / SGPA / CGPA
-Results track a student's academic history.
-- **SGPA**: Computed based on `Σ(Credit × Grade Point) / Σ(Credit)` for a specific semester.
-- **CGPA**: The cumulative equivalent computed across all historical semesters.
-- **Grade Points**: Mapped from letter grades (O, A+, A, B, etc.).
-
-### Backlogs
-Students failing to clear a subject accumulate a `Backlog`. Backlogs fuel the Risk Distribution analytics. Once a student clears a subject, the backlog is resolved.
-
-### Remedial Classes & Guest Lectures
-Academic support modules allowing Coordinators to create events. Both models track status (`SCHEDULED`, `COMPLETED`, `CANCELLED`). Completing an event triggers database updates and broadcasts notifications to relevant faculty and students.
-
-### Notifications
-A robust notification engine generates alerts for critical actions (e.g., Guest Lecture completed). Notifications track an `isRead` flag and populate a real-time Topbar dropdown.
-
----
-
-## Dashboards & Analytics
+## Student Academic Workflow
 
 ```mermaid
-flowchart LR
-    UI[Dashboard Component] --> API[GET /analytics/dashboard]
-    API --> AS[Analytics Service]
-    AS --> DB[(MongoDB Aggregation Pipeline)]
-    DB --> AS
-    AS --> API
-    API --> UI
-    UI --> C[Render Recharts / KPI Cards]
+flowchart TD
+    StudentLogin["Student Login"]
+    Dashboard["Dashboard"]
+    AcadInfo["Academic Information"]
+    Results["Results"]
+    SemSelection["Semester Selection"]
+    SubjectResults["Subject Results"]
+    SGPA["SGPA"]
+    CGPA["CGPA"]
+    Backlogs["Backlogs"]
+    Attendance["Attendance"]
+    RemedialClasses["Remedial Classes"]
+    GuestLectures["Guest Lectures"]
+    Notifications["Notifications"]
+
+    StudentLogin --> Dashboard
+    Dashboard --> AcadInfo
+    Dashboard --> Results
+    Results --> SemSelection
+    SemSelection --> SubjectResults
+    SubjectResults --> SGPA
+    SubjectResults --> CGPA
+    Dashboard --> Backlogs
+    Dashboard --> Attendance
+    Dashboard --> RemedialClasses
+    Dashboard --> GuestLectures
+    Dashboard --> Notifications
 ```
-**Registered Subjects KPI**: Accurately reflects the number of uniquely identifiable subject syllabi mapped within the college (~179), explicitly excluding unmapped orphaned subjects.
 
----
+## Result Processing Workflow
 
-## API Architecture
+```mermaid
+flowchart TD
+    PDFUpload["PDF Upload"]
+    NodeExpress["Node.js / Express"]
+    FileHandling["File handling"]
+    PythonProcessor["Python PDF Processor"]
+    ExtractData["Extract Result Data"]
+    Validate["Validate"]
+    MapSubjects["Map Subjects/Semesters"]
+    StoreData["Store Structured Data"]
+    MongoDB["MongoDB"]
+    ResultsAPI["Results API"]
+    ReactUI["React Results UI"]
 
-| Module | Endpoint Prefix | Purpose | Scope/Auth |
-| ------ | --------------- | ------- | ---------- |
-| **Auth** | `/api/auth` | Login, /me, role resolution | Public / Authenticated |
-| **Master** | `/api/academic-master` | Campuses, Branches, Subjects | Admin |
-| **Users** | `/api/users` | User CRUD, Profile updates | Admin / Self |
-| **Students** | `/api/students` | Student rosters, details | Principal, HOD, Coord |
-| **Analytics**| `/api/analytics` | KPIs, Risk charts, Dashboards | Principal, HOD, Admin |
-| **Results** | `/api/results` | Marks, SGPA, CGPA | HOD, Coord, Student |
-| **Backlogs** | `/api/backlogs` | Uncleared subject tracking | HOD, Coord, Student |
-| **Support** | `/api/guest-lectures`<br>`/api/remedial-classes` | Scheduling, Status updates | Coordinator, Student |
-| **Notifs** | `/api/notifications` | Fetch unread, mark read | All Authenticated Users |
+    PDFUpload --> NodeExpress
+    NodeExpress --> FileHandling
+    FileHandling --> PythonProcessor
+    PythonProcessor --> ExtractData
+    ExtractData --> Validate
+    Validate --> MapSubjects
+    MapSubjects --> StoreData
+    StoreData --> MongoDB
+    MongoDB --> ResultsAPI
+    ResultsAPI --> ReactUI
+```
 
----
+## SGPA / CGPA Workflow
+Academic calculations are derived from subject credits and grade points. Semesters calculate SGPA individually, while cumulative metrics track across the entire student lifecycle based on the official source of truth in the database.
 
-## Database Architecture
+```mermaid
+flowchart TD
+    FetchResults["Fetch Subject Results"]
+    MapCredits["Map Credits & Grades"]
+    CalcGradePoints["Calculate Grade Points"]
+    AggSemester["Aggregate Semester Credits"]
+    CalcSGPA["Calculate SGPA"]
+    AggTotal["Aggregate Cumulative Credits"]
+    CalcCGPA["Calculate CGPA"]
+    SaveDB["Store in Database"]
 
-| Model | Purpose | Important Relationships |
-| ----- | ------- | ----------------------- |
-| **User** | System identities | Base auth identity |
-| **Student** | Student specifics | Links to User, Branch, Semester |
-| **Campus** | Physical locations | Top-level entity |
-| **Branch** | Academic departments | Belongs to Campus |
-| **Semester** | Academic terms | Belongs to Year |
-| **Subject** | Academic courses | Maps to Semesters/Branches |
-| **SubjectBranchMapping** | Curriculum mapping | Joins Subject, Branch, Semester |
-| **SemesterResult** | Student term performance| Links Student, Semester |
-| **Backlog** | Uncleared subjects | Links Student, Subject |
-| **GuestLecture** | Support events | Links Branch, Coordinator |
-| **Notification** | Alerts | Links to recipient User |
+    FetchResults --> MapCredits
+    MapCredits --> CalcGradePoints
+    CalcGradePoints --> AggSemester
+    AggSemester --> CalcSGPA
+    CalcGradePoints --> AggTotal
+    AggTotal --> CalcCGPA
+    CalcSGPA --> SaveDB
+    CalcCGPA --> SaveDB
+```
 
----
+## Avatar / Profile Workflow
+Avatars are managed securely through MongoDB GridFS.
 
-## Frontend Architecture
+```mermaid
+flowchart TD
+    ProfileImage["Profile Image Upload"]
+    FormData["FormData"]
+    Express["Express Route"]
+    MulterStorage["Multer Memory Storage"]
+    GridFS["MongoDB GridFS"]
+    AvatarId["avatarFileId in User Document"]
+    AuthEndpoint["Authenticated Avatar Endpoint"]
+    ReactAvatar["React Avatar Component"]
+    ProfileUI["Profile / Topbar / Dashboard UI"]
 
+    ProfileImage --> FormData
+    FormData --> Express
+    Express --> MulterStorage
+    MulterStorage --> GridFS
+    GridFS --> AvatarId
+    AvatarId --> AuthEndpoint
+    AuthEndpoint --> ReactAvatar
+    ReactAvatar --> ProfileUI
+```
+
+## Notification Workflow
+The system features event-driven notifications to keep students informed of critical academic support opportunities.
+
+```mermaid
+flowchart TD
+    Event["Event Trigger (e.g. Remedial Class Created/Updated)"]
+    NotifService["Notification Service"]
+    Recipients["Identify Eligible Recipients"]
+    MongoDB["Store in MongoDB"]
+    NotifUI["Notification UI Dashboard"]
+
+    Event --> NotifService
+    NotifService --> Recipients
+    Recipients --> MongoDB
+    MongoDB --> NotifUI
+```
+
+## Analytics Workflow
+
+```mermaid
+flowchart TD
+    AcadData["Academic Data"]
+    AggServices["Aggregation Services"]
+    Metrics["Performance Metrics"]
+    Risk["Risk / Backlog / Attendance Analytics"]
+    DashCharts["Dashboard Charts"]
+    RoleUI["Role-specific UI"]
+
+    AcadData --> AggServices
+    AggServices --> Metrics
+    Metrics --> Risk
+    Risk --> DashCharts
+    DashCharts --> RoleUI
+```
+
+## Project Structure
 ```text
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── common/      (Reusable UI: PageHeader, LoadingSkeleton)
-│   │   └── ui/          (Radix/Tailwind components)
-│   ├── contexts/        (AuthContext, NavigationContext)
-│   ├── layouts/         (DashboardLayout, Topbar, Sidebar)
-│   ├── modules/         (Domain logic: admin, student, principal, etc.)
-│   ├── services/        (Axios API clients)
-│   ├── utils/           (Helpers, PDF generation)
-│   ├── App.tsx          (Root component & Providers)
-│   └── main.tsx         (Entry point)
+project/
+├── backend/               # Node.js Express backend and API logic
+├── frontend/              # React/Vite JavaScript frontend application
+├── result-processor/      # Python utility for PDF parsing and data extraction
+├── source-data/           # Original seed and curriculum source files
+├── reference/             # Project documentation and specifications
+├── .gitignore
+└── README.md
 ```
-
-## Backend Architecture
-
-```text
-backend/
-├── src/
-│   ├── config/          (DB connection, env vars)
-│   ├── middleware/      (Auth, Error handling, RBAC)
-│   ├── modules/         (Domain logic)
-│   │   ├── auth/        (Controllers, Routes, Services)
-│   │   ├── academic-master/
-│   │   ├── analytics/
-│   │   ├── results-backlogs/
-│   │   └── notifications/
-│   ├── utils/           (Helpers)
-│   └── server.js        (Express entry point)
-```
-
----
-
-## Security
-- **Authentication**: JWT validation middleware secures all non-public routes.
-- **Authorization**: Role-based access control (RBAC) middleware rejects requests exceeding user permissions.
-- **Data Scoping**: HOD and Coordinator controllers strictly scope MongoDB queries using `req.user.branchId` to prevent cross-department data leaks.
-- **Data Integrity**: Passwords are mathematically hashed using bcrypt before storage.
-- **Validation**: Strict input parsing via `express-validator` prevents malformed data injection.
-
----
-
-## Installation & Local Setup
-
-### Prerequisites
-- Node.js (v18+)
-- MongoDB (Local or Atlas URL)
-- Docker (optional)
-
-### Environment Variables
-Create a `.env` file in the `backend/` directory:
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/student-academic-system
-JWT_SECRET=your_secure_random_string
-```
-Create a `.env` file in the `frontend/` directory:
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-### Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
----
-
-## Docker Deployment
-
-The application is container-ready, orchestrating the frontend, backend, and MongoDB via Docker Compose.
-
-```mermaid
-flowchart TD
-    DC[Docker Compose]
-    DC --> F[Frontend Container: Port 80]
-    DC --> B[Backend Container: Port 5000]
-    DC --> M[MongoDB Container: Port 27017]
-```
-
-To deploy locally:
-```bash
-docker-compose up --build
-```
-
----
-
-## Testing
-
-The backend implements a testing suite utilizing **Jest** and **Supertest**.
-```bash
-cd backend
-npm run test
-```
-
----
-
-## Future Scope
-- Integrating AI-driven early-warning systems based on historical backlog trends.
-- Implementing an automated timetable generation engine for Remedial Classes.
-- Expanding the Analytics dashboard with predictive graduation trajectory models.
-- Support for detailed granular Attendance tracking synced with Guest Lectures.
-
----
-*End of Documentation*
