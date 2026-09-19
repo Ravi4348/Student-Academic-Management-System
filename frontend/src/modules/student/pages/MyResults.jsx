@@ -94,11 +94,11 @@ export const MyResults = () => {
             const sameId =
               existing.subjectId?._id &&
               r.subjectId?._id &&
-              existing.subjectId._id === r.subjectId._id;
+              existing.subjectId?._id === r.subjectId?._id;
             const sameCode =
               existing.subjectId?.subjectCode &&
               r.subjectId?.subjectCode &&
-              existing.subjectId.subjectCode === r.subjectId.subjectCode;
+              existing.subjectId?.subjectCode === r.subjectId?.subjectCode;
             if (r.subjectId?._id && existing.subjectId?._id) {
               return sameId;
             } else if (

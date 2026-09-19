@@ -109,7 +109,7 @@ class AcademicResultService {
     
     const officialSems = {};
     officialResults.forEach(r => {
-        const stuId = r.studentId._id ? r.studentId._id.toString() : r.studentId.toString();
+        const stuId = r.studentId?._id ? r.studentId._id.toString() : r.studentId?.toString();
         if (!officialSems[stuId]) officialSems[stuId] = new Set();
         const semCode = r.academicSemesterId.semesterCode;
         if (semCode) officialSems[stuId].add(semCode);
@@ -162,16 +162,16 @@ class AcademicResultService {
             
             historicalData.forEach(hd => {
                 const stuIdStr = hd.studentId.toString();
-                const semIdStr = hd.academicSemesterId._id ? hd.academicSemesterId._id.toString() : hd.academicSemesterId.toString();
+                const semIdStr = hd.academicSemesterId?._id ? hd.academicSemesterId._id.toString() : hd.academicSemesterId?.toString();
                 
                 if (studentToMissingSemIds[stuIdStr] && studentToMissingSemIds[stuIdStr].includes(semIdStr)) {
-                    const st = students.find(s => s._id.toString() === stuIdStr);
-                    const mappedSem = allSemesters.find(s => s._id.toString() === semIdStr);
+                    const st = students.find(s => s._id?.toString() === stuIdStr);
+                    const mappedSem = allSemesters.find(s => s._id?.toString() === semIdStr);
                     
                     data.push({
                         ...hd,
-                        studentId: { _id: st._id, name: st.name, rollNo: st.rollNo },
-                        semesterId: { _id: mappedSem._id, semesterCode: mappedSem.semesterCode, year: mappedSem.year }
+                        studentId: { _id: st?._id, name: st?.name, rollNo: st?.rollNo },
+                        semesterId: { _id: mappedSem?._id, semesterCode: mappedSem?.semesterCode, year: mappedSem?.year }
                     });
                 }
             });
@@ -183,12 +183,12 @@ class AcademicResultService {
     const processedByStudentAndSem = {};
 
     for (const item of data) {
-      const stuIdStr = item.studentId._id ? item.studentId._id.toString() : item.studentId.toString();
+      const stuIdStr = item.studentId?._id ? item.studentId._id.toString() : item.studentId?.toString();
       const semCode = item.semesterId.semesterCode;
-      const subIdStr = item.subjectId._id ? item.subjectId._id.toString() : null;
-      const subCode = item.subjectId.subjectCode || item.subjectCode || '';
+      const subIdStr = item.subjectId?._id ? item.subjectId._id.toString() : null;
+      const subCode = item.subjectId?.subjectCode || item.subjectCode || '';
       
-      const rawSubName = item.subjectId.subjectName || item.subjectName || '';
+      const rawSubName = item.subjectId?.subjectName || item.subjectName || '';
       const normalizedName = rawSubName
           .toUpperCase()
           .replace(/&/g, ' & ')

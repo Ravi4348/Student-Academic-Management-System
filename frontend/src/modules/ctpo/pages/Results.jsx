@@ -140,7 +140,7 @@ export const Results = () => {
         const sameCode =
           existing.subjectId?.subjectCode &&
           r.subjectId?.subjectCode &&
-          existing.subjectId.subjectCode === r.subjectId.subjectCode;
+          existing.subjectId?.subjectCode === r.subjectId?.subjectCode;
         if (r.subjectId?._id && existing.subjectId?._id) {
           return sameId;
         } else if (
