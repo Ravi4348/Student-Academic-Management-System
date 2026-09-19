@@ -25,7 +25,24 @@ export const ResultImport = () => {
     const fetchSemesters = async () => {
       try {
         const data = await academicConfigService.getAllSemesters();
-        setSemesters(data || []);
+        
+        const allowedSemesters = ["1-1", "1-2", "2-1", "2-2", "3-1", "3-2", "4-1"];
+        const uniqueSemesters = [];
+        const seen = new Set();
+        
+        (data || []).forEach(s => {
+          const code = (s.semesterCode || "").trim();
+          if (allowedSemesters.includes(code) && !seen.has(code)) {
+            seen.add(code);
+            uniqueSemesters.push({ ...s, semesterCode: code });
+          }
+        });
+        
+        uniqueSemesters.sort((a, b) => 
+          allowedSemesters.indexOf(a.semesterCode) - allowedSemesters.indexOf(b.semesterCode)
+        );
+        
+        setSemesters(uniqueSemesters);
       } catch (err) {
         console.error("Failed to load semesters", err);
       }

@@ -79,9 +79,13 @@ export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
     navigate("/login");
   };
 
-  const goToNotifications = () => {
+  const goToNotifications = async () => {
     if (user?.role === "ADMIN") {
       navigate("/admin/notices");
+      return;
+    }
+    if (user?.role === "CTPO") {
+      navigate("/ctpo/notices");
       return;
     }
     const rolePath =
@@ -89,9 +93,7 @@ export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
         ? "student"
         : user?.role?.toLowerCase() === "coordinator"
           ? "coordinator"
-          : user?.role?.toLowerCase() === "ctpo"
-            ? "ctpo"
-            : "admin";
+          : "admin";
     navigate(`/${rolePath}/notifications`);
   };
 
@@ -117,7 +119,7 @@ export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
 
       <div className="flex items-center gap-4">
         {/* Notifications */}
-        {user?.role !== "PRINCIPAL" && (
+        {user?.role !== "PRINCIPAL" && user?.role !== "HOD" && (
           <Button
             variant="ghost"
             size="icon"

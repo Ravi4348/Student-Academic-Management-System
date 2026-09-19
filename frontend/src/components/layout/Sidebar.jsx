@@ -129,8 +129,8 @@ export const Sidebar = ({ className }) => {
         icon: <AlertTriangle className="w-5 h-5" />,
       },
       {
-        name: "Remedial",
-        path: "/hod/remedial",
+        name: "Guest Lectures",
+        path: "/hod/guest-lectures",
         icon: <Users className="w-5 h-5" />,
       },
     ],

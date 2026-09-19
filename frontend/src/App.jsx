@@ -27,7 +27,7 @@ import { Performance as HodPerformance } from "./modules/hod/pages/Performance";
 import { Results as HodResults } from "./modules/hod/pages/Results";
 import { Backlogs as HodBacklogs } from "./modules/hod/pages/Backlogs";
 import { Risk as HodRisk } from "./modules/hod/pages/Risk";
-import { Remedial as HodRemedial } from "./modules/hod/pages/Remedial";
+import { GuestLectures as HodGuestLectures } from "./modules/hod/pages/GuestLectures";
 import { Dashboard as PrincipalDashboard } from "./modules/principal/pages/Dashboard";
 import { CampusOverview as PrincipalCampusOverview } from "./modules/principal/pages/CampusOverview";
 import { DrillDown as PrincipalDrillDown } from "./modules/principal/pages/DrillDown";
@@ -116,7 +116,7 @@ function App() {
             <Route path="/hod/results" element={<HodResults />} />
             <Route path="/hod/backlogs" element={<HodBacklogs />} />
             <Route path="/hod/risk" element={<HodRisk />} />
-            <Route path="/hod/remedial" element={<HodRemedial />} />
+            <Route path="/hod/guest-lectures" element={<HodGuestLectures />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={["PRINCIPAL"]} />}>
