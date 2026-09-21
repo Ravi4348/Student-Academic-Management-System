@@ -312,6 +312,12 @@ export const Results = () => {
                           layout="vertical"
                           margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                         >
+                          <defs>
+                            <linearGradient id="resultsTopSubjGrad" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#052659" />
+                              <stop offset="100%" stopColor="#0090FF" />
+                            </linearGradient>
+                          </defs>
                           <CartesianGrid
                             strokeDasharray="3 3"
                             horizontal={false}
@@ -342,8 +348,8 @@ export const Results = () => {
                           />
                           <Bar
                             dataKey="count"
-                            fill="#ef4444"
-                            radius={[0, 4, 4, 0]}
+                            fill="url(#resultsTopSubjGrad)"
+                            radius={[0, 6, 6, 0]}
                             name="Active Backlogs"
                             barSize={30}
                           >
@@ -629,6 +635,16 @@ export const Results = () => {
                         layout="vertical"
                         margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                       >
+                        <defs>
+                          <linearGradient id="resultsPassGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#065f46" />
+                            <stop offset="100%" stopColor="#34d399" />
+                          </linearGradient>
+                          <linearGradient id="resultsFailGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#9f1239" />
+                            <stop offset="100%" stopColor="#fb7185" />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid
                           strokeDasharray="3 3"
                           horizontal={false}
@@ -656,16 +672,16 @@ export const Results = () => {
                         <Bar
                           dataKey="pass"
                           stackId="a"
-                          fill="#10b981"
+                          fill="url(#resultsPassGrad)"
                           name="Pass"
                           radius={[0, 0, 0, 0]}
                         />
                         <Bar
                           dataKey="fail"
                           stackId="a"
-                          fill="#ef4444"
+                          fill="url(#resultsFailGrad)"
                           name="Fail"
-                          radius={[0, 4, 4, 0]}
+                          radius={[0, 6, 6, 0]}
                         />
                       </BarChart>
                     </ResponsiveContainer>
@@ -686,6 +702,12 @@ export const Results = () => {
                         data={sortedGradeDistribution}
                         margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                       >
+                        <defs>
+                          <linearGradient id="resultsGradeGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#0090FF" />
+                            <stop offset="100%" stopColor="#052659" />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid
                           strokeDasharray="3 3"
                           vertical={false}
@@ -713,8 +735,8 @@ export const Results = () => {
                         <Legend />
                         <Bar
                           dataKey="count"
-                          fill="#8b5cf6"
-                          radius={[4, 4, 0, 0]}
+                          fill="url(#resultsGradeGrad)"
+                          radius={[6, 6, 0, 0]}
                           name="Grade Frequency"
                         />
                       </BarChart>

@@ -12,6 +12,7 @@ router.route('/')
   .post(requireRole('ADMIN'), availabilityValidator, availabilityController.createAvailability);
 
 router.route('/:id')
-  .patch(requireRole('ADMIN'), availabilityController.updateAvailability);
+  .patch(requireRole('ADMIN'), availabilityController.updateAvailability)
+  .delete(requireRole('ADMIN'), availabilityController.deleteAvailability);
 
 module.exports = router;

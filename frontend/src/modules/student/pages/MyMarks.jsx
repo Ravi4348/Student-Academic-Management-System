@@ -145,42 +145,42 @@ export const MyMarks = () => {
       ) : marks.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-emerald-50 border-emerald-100 shadow-sm">
+            <Card className="bg-[#f0fdf4] border border-emerald-200/80 shadow-xs rounded-xl">
               <CardHeader className="pb-2">
-                <CardTitle className="text-emerald-800 text-lg">
+                <CardTitle className="text-emerald-900 text-base font-bold">
                   Mid-1 Average
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {mid1Avg === "Not Available" ? (
-                  <div className="text-lg font-medium text-emerald-700">
+                  <div className="text-sm font-semibold text-emerald-700">
                     Not Available
                   </div>
                 ) : (
-                  <div className="text-3xl font-bold text-emerald-900">
+                  <div className="text-3xl font-extrabold text-emerald-950">
                     {mid1Avg}{" "}
-                    <span className="text-sm font-normal text-emerald-700">
+                    <span className="text-xs font-semibold text-emerald-700">
                       / 30
                     </span>
                   </div>
                 )}
               </CardContent>
             </Card>
-            <Card className="bg-blue-50 border-blue-100 shadow-sm">
+            <Card className="bg-[#f4f9fd] border border-[#7DA0CA]/40 shadow-xs rounded-xl">
               <CardHeader className="pb-2">
-                <CardTitle className="text-blue-800 text-lg">
+                <CardTitle className="text-[#052659] text-base font-bold">
                   Mid-2 Average
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {mid2Avg === "Not Available" ? (
-                  <div className="text-lg font-medium text-blue-700">
+                  <div className="text-sm font-semibold text-[#5483B3]">
                     Not Available
                   </div>
                 ) : (
-                  <div className="text-3xl font-bold text-blue-900">
+                  <div className="text-3xl font-extrabold text-[#021024]">
                     {mid2Avg}{" "}
-                    <span className="text-sm font-normal text-blue-700">
+                    <span className="text-xs font-semibold text-[#5483B3]">
                       / 30
                     </span>
                   </div>
@@ -190,19 +190,29 @@ export const MyMarks = () => {
           </div>
 
           {chartData.length > 0 && (
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-slate-800">
+            <Card className="shadow-xs border border-[#7DA0CA]/35 rounded-xl bg-white">
+              <CardHeader className="border-b border-[#7DA0CA]/20 bg-[#f4f9fd]/50 pb-3">
+                <CardTitle className="text-[#021024] text-sm font-bold">
                   Mid-1 vs Mid-2 Comparison
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={chartData}
                       margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                     >
+                      <defs>
+                        <linearGradient id="mid1Grad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0090FF" />
+                          <stop offset="100%" stopColor="#052659" />
+                        </linearGradient>
+                        <linearGradient id="mid2Grad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#38bdf8" />
+                          <stop offset="100%" stopColor="#0284c7" />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -212,13 +222,13 @@ export const MyMarks = () => {
                         dataKey="subject"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 12, fill: "#64748b" }}
+                        tick={{ fontSize: 12, fill: "#5483B3" }}
                       />
                       <YAxis
                         domain={[0, 30]}
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 12, fill: "#64748b" }}
+                        tick={{ fontSize: 12, fill: "#5483B3" }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -226,7 +236,7 @@ export const MyMarks = () => {
                           border: "none",
                           boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                         }}
-                        cursor={{ fill: "#f1f5f9" }}
+                        cursor={{ fill: "#f8fafc" }}
                       />
 
                       <Legend
@@ -235,15 +245,15 @@ export const MyMarks = () => {
                       />
                       <Bar
                         dataKey="Mid 1"
-                        fill="#3b82f6"
-                        radius={[4, 4, 0, 0]}
-                        maxBarSize={40}
+                        fill="url(#mid1Grad)"
+                        radius={[6, 6, 0, 0]}
+                        maxBarSize={36}
                       />
                       <Bar
                         dataKey="Mid 2"
-                        fill="#10b981"
-                        radius={[4, 4, 0, 0]}
-                        maxBarSize={40}
+                        fill="url(#mid2Grad)"
+                        radius={[6, 6, 0, 0]}
+                        maxBarSize={36}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -252,7 +262,7 @@ export const MyMarks = () => {
             </Card>
           )}
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">
+          <div className="bg-white rounded-xl shadow-xs border border-[#7DA0CA]/35 overflow-hidden mt-6">
             <DataTable
               data={marks}
               columns={columns}

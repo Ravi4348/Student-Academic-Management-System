@@ -19,6 +19,13 @@ import {
 import { format } from "date-fns";
 import { apiClient } from "@/services/apiClient";
 import { AttendanceModal } from "../components/AttendanceModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export const GuestLectures = () => {
   const [lectures, setLectures] = useState([]);
@@ -428,19 +435,22 @@ export const GuestLectures = () => {
         }}
       />
 
-      {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col my-8">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-white shrink-0">
-              <h2 className="text-xl font-bold">Schedule Guest Lecture</h2>
-              <button
-                onClick={() => setIsDialogOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 flex-1 overflow-y-auto">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-4xl bg-white p-0 gap-0 overflow-hidden rounded-xl border border-[#7DA0CA]/40 shadow-xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="px-6 py-4 border-b border-[#7DA0CA]/25 bg-[#052659] text-white flex flex-row items-center justify-between shrink-0">
+            <DialogTitle className="text-base font-bold text-white">
+              Schedule Guest Lecture
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDialogOpen(false)}
+              className="h-8 w-8 text-white/80 hover:bg-white/10 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </DialogHeader>
+          <div className="p-6 flex-1 overflow-y-auto bg-[#f4f9fd]/30">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <form
                   onSubmit={handleCreate}
@@ -824,11 +834,10 @@ export const GuestLectures = () => {
                     </>
                   )}
                 </div>
-              </div>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {attendanceSessionId && (
         <AttendanceModal

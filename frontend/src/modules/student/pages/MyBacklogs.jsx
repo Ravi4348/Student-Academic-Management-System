@@ -65,7 +65,7 @@ export const MyBacklogs = () => {
   // Calculate Backlogs by Semester chart data
   const semesterCount = {};
   backlogs.forEach((b) => {
-    const sem = b.semesterId?.semesterCode || "Unknown";
+    const sem = b.academicSemesterId?.semesterCode || "Unknown";
     semesterCount[sem] = (semesterCount[sem] || 0) + 1;
   });
   const barChartData = Object.keys(semesterCount)
@@ -79,7 +79,7 @@ export const MyBacklogs = () => {
     { header: "Subject", cell: (row) => row.subjectId?.subjectName || "-" },
     {
       header: "Semester",
-      cell: (row) => row.academicSemesterId?.semesterCode || "-",
+      cell: (row) => row.academicSemesterId?.semesterCode || "Unknown",
     },
     {
       header: "Status",
@@ -106,46 +106,46 @@ export const MyBacklogs = () => {
       ) : (
         <>
           {/* Three Summary Cards + Risk Card */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="shadow-sm border-slate-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <Card className="shadow-xs border border-[#7DA0CA]/35 rounded-xl bg-white">
               <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
-                <span className="text-slate-500 text-sm font-medium uppercase tracking-wider mb-2">
+                <span className="text-[#5483B3] text-xs font-bold uppercase tracking-wider mb-2">
                   Total Backlog History
                 </span>
-                <span className="text-4xl font-bold text-slate-800">
+                <span className="text-3xl font-extrabold text-[#021024]">
                   {backlogs.length}
                 </span>
               </CardContent>
             </Card>
-            <Card className="shadow-sm border-slate-200">
+            <Card className="shadow-xs border border-[#7DA0CA]/35 rounded-xl bg-white">
               <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
-                <span className="text-slate-500 text-sm font-medium uppercase tracking-wider mb-2">
+                <span className="text-[#5483B3] text-xs font-bold uppercase tracking-wider mb-2">
                   Cleared Subjects
                 </span>
-                <span className="text-4xl font-bold text-emerald-600">
+                <span className="text-3xl font-extrabold text-emerald-600">
                   {clearedBacklogs.length}
                 </span>
               </CardContent>
             </Card>
-            <Card className="shadow-sm border-slate-200">
+            <Card className="shadow-xs border border-[#7DA0CA]/35 rounded-xl bg-white">
               <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
-                <span className="text-slate-500 text-sm font-medium uppercase tracking-wider mb-2">
+                <span className="text-[#5483B3] text-xs font-bold uppercase tracking-wider mb-2">
                   Remaining Active Backlogs
                 </span>
-                <span className="text-4xl font-bold text-rose-600">
+                <span className="text-3xl font-extrabold text-rose-600">
                   {activeBacklogs.length}
                 </span>
               </CardContent>
             </Card>
-            <Card className={`shadow-sm border ${riskColor}`}>
+            <Card className={`shadow-xs rounded-xl border ${riskColor}`}>
               <CardContent className="p-6 flex flex-col items-center justify-center h-full text-center">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-5 h-5" />
-                  <span className="text-sm font-medium uppercase tracking-wider opacity-80">
+                  <span className="text-xs font-bold uppercase tracking-wider opacity-90">
                     Academic Risk
                   </span>
                 </div>
-                <div className="text-3xl font-bold">{riskLevel}</div>
+                <div className="text-3xl font-extrabold">{riskLevel}</div>
               </CardContent>
             </Card>
           </div>
@@ -153,13 +153,13 @@ export const MyBacklogs = () => {
           {/* Charts Section */}
           {backlogs.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="shadow-sm border-slate-200">
-                <CardHeader>
-                  <CardTitle className="text-slate-800 text-base">
+              <Card className="shadow-xs border border-[#7DA0CA]/35 rounded-xl bg-white">
+                <CardHeader className="border-b border-[#7DA0CA]/20 bg-[#f4f9fd]/50 pb-3">
+                  <CardTitle className="text-[#021024] text-sm font-bold">
                     Active vs Cleared
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                   <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -190,26 +190,32 @@ export const MyBacklogs = () => {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-sm border-slate-200">
-                <CardHeader>
-                  <CardTitle className="text-slate-800 text-base">
+              <Card className="shadow-xs border border-[#7DA0CA]/35 rounded-xl bg-white">
+                <CardHeader className="border-b border-[#7DA0CA]/20 bg-[#f4f9fd]/50 pb-3">
+                  <CardTitle className="text-[#021024] text-sm font-bold">
                     Backlogs by Semester
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-[250px] w-full pt-4">
+                <CardContent className="pt-4">
+                  <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={barChartData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <defs>
+                          <linearGradient id="backlogSemGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#0090FF" />
+                            <stop offset="100%" stopColor="#052659" />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                         <XAxis
                           dataKey="semester"
-                          tick={{ fontSize: 12 }}
+                          tick={{ fontSize: 12, fill: "#5483B3" }}
                           tickLine={false}
                           axisLine={false}
                         />
                         <YAxis
                           allowDecimals={false}
-                          tick={{ fontSize: 12 }}
+                          tick={{ fontSize: 12, fill: "#5483B3" }}
                           tickLine={false}
                           axisLine={false}
                         />
@@ -223,9 +229,9 @@ export const MyBacklogs = () => {
                         />
                         <Bar
                           dataKey="count"
-                          fill="#6366f1"
-                          radius={[4, 4, 0, 0]}
-                          barSize={40}
+                          fill="url(#backlogSemGrad)"
+                          radius={[6, 6, 0, 0]}
+                          barSize={36}
                         />
                       </BarChart>
                     </ResponsiveContainer>
@@ -235,9 +241,9 @@ export const MyBacklogs = () => {
             </div>
           )}
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">
-            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-              <h3 className="font-semibold text-slate-800">Backlog Records</h3>
+          <div className="bg-white rounded-xl shadow-xs border border-[#7DA0CA]/35 overflow-hidden mt-6">
+            <div className="px-6 py-4 border-b border-[#7DA0CA]/20 bg-[#f4f9fd]/50">
+              <h3 className="font-bold text-sm text-[#021024]">Backlog Records</h3>
             </div>
             <DataTable
               data={backlogs}

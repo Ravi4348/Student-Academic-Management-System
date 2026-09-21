@@ -60,9 +60,15 @@ class AnalyticsService {
     let backlogMatch = { status: 'ACTIVE' };
     let backlogPipeline = [];
     if (query.academicSemesterId && historicalStudentIds) {
-       backlogMatch.academicSemesterId = new mongoose.Types.ObjectId(query.academicSemesterId);
+       const SemesterModel = mongoose.models.Semester || mongoose.model('Semester');
+       const targetSem = await SemesterModel.findById(query.academicSemesterId);
        backlogMatch.studentId = { $in: historicalStudentIds };
-       backlogPipeline = [ { $match: backlogMatch } ];
+       backlogPipeline = [
+         { $match: backlogMatch },
+         { $lookup: { from: 'semesters', localField: 'academicSemesterId', foreignField: '_id', as: 'sem' } },
+         { $unwind: { path: '$sem', preserveNullAndEmptyArrays: true } },
+         { $match: { 'sem.semesterCode': targetSem ? targetSem.semesterCode : '' } }
+       ];
     } else {
        backlogPipeline = [
          { $match: backlogMatch },
@@ -143,19 +149,21 @@ class AnalyticsService {
     }
 
     if (query.academicSemesterId) {
-        examMatchStage['exam.semesterId'] = new mongoose.Types.ObjectId(query.academicSemesterId);
+        const SemesterModel = mongoose.models.Semester || mongoose.model('Semester');
+        const targetSem = await SemesterModel.findById(query.academicSemesterId);
+        if (targetSem) examMatchStage['examSem.semesterCode'] = targetSem.semesterCode;
     } else if (query.semesterCode) {
-        const sems = await Semester.find({ semesterCode: query.semesterCode });
-        if (sems.length > 0) examMatchStage['exam.semesterId'] = { $in: sems.map(s => s._id) };
+        examMatchStage['examSem.semesterCode'] = query.semesterCode;
     } else if (query.year) {
-        const sems = await Semester.find({ year: Number(query.year) });
-        if (sems.length > 0) examMatchStage['exam.semesterId'] = { $in: sems.map(s => s._id) };
+        examMatchStage['examSem.year'] = Number(query.year);
     }
 
     const marksAgg = await Marks.aggregate([
       { $match: matchStage },
       { $lookup: { from: 'examinations', localField: 'examinationId', foreignField: '_id', as: 'exam' } },
       { $unwind: '$exam' },
+      { $lookup: { from: 'semesters', localField: 'exam.semesterId', foreignField: '_id', as: 'examSem' } },
+      { $unwind: '$examSem' },
       { $match: examMatchStage },
       { $project: {
           studentId: 1,
@@ -229,13 +237,19 @@ class AnalyticsService {
     }
 
     const backlogMatch = { status: 'ACTIVE' };
+    let targetSemesterCode = '';
     if (query.academicSemesterId) {
-       backlogMatch.academicSemesterId = new mongoose.Types.ObjectId(query.academicSemesterId);
+       const SemesterModel = mongoose.models.Semester || mongoose.model('Semester');
+       const targetSem = await SemesterModel.findById(query.academicSemesterId);
+       if (targetSem) targetSemesterCode = targetSem.semesterCode;
     }
     
     let pipeline = [];
     if (query.academicSemesterId) {
         pipeline.push({ $match: { ...backlogMatch, studentId: matchStage.studentId } });
+        pipeline.push({ $lookup: { from: 'semesters', localField: 'academicSemesterId', foreignField: '_id', as: 'sem' } });
+        pipeline.push({ $unwind: { path: '$sem', preserveNullAndEmptyArrays: true } });
+        pipeline.push({ $match: { 'sem.semesterCode': targetSemesterCode } });
     } else {
         if (Object.keys(studentQuery).length > 0) {
             const matchedStudents = await Student.find(studentQuery, '_id').lean();
@@ -316,20 +330,25 @@ class AnalyticsService {
     else if (maxYear >= 4) availableSemesters = ['1-1', '1-2', '2-1', '2-2', '3-1', '3-2', '4-1', '4-2'];
 
     let targetSemesterCode = query.semesterCode || '';
-
     if (query.academicSemesterId) {
-        currentSemesterMatch.academicSemesterId = new mongoose.Types.ObjectId(query.academicSemesterId);
-    } else if (query.semesterCode) {
-        const sems = await Semester.find({ semesterCode: query.semesterCode });
-        if (sems.length > 0) currentSemesterMatch.academicSemesterId = { $in: sems.map(s => s._id) };
+        const SemesterModel = mongoose.models.Semester || mongoose.model('Semester');
+        const targetSem = await SemesterModel.findById(query.academicSemesterId);
+        if (targetSem) targetSemesterCode = targetSem.semesterCode;
+    }
+
+    let resolvedSemMatch = [];
+    if (targetSemesterCode) {
+        resolvedSemMatch = [{ $match: { 'sem.semesterCode': targetSemesterCode } }];
     } else if (query.year) {
-        const sems = await Semester.find({ year: Number(query.year) });
-        if (sems.length > 0) currentSemesterMatch.academicSemesterId = { $in: sems.map(s => s._id) };
+        resolvedSemMatch = [{ $match: { 'sem.year': Number(query.year) } }];
     }
 
     // 1. Current Semester Distribution - Optimized with Database Aggregation
     const resultsAgg = await SemesterResult.aggregate([
       { $match: currentSemesterMatch },
+      { $lookup: { from: 'semesters', localField: 'academicSemesterId', foreignField: '_id', as: 'sem' } },
+      { $unwind: { path: '$sem', preserveNullAndEmptyArrays: true } },
+      ...resolvedSemMatch,
       { $lookup: { from: 'subjects', localField: 'subjectId', foreignField: '_id', as: 'subject' } },
       { $unwind: { path: '$subject', preserveNullAndEmptyArrays: true } },
       {
@@ -444,8 +463,15 @@ class AnalyticsService {
         const currentIndex = availableSemesters.length > 0 ? semOrder[availableSemesters[availableSemesters.length - 1]] : 0;
         
         let anyResultsForSem = false;
-        if (currentSemesterMatch.academicSemesterId) {
-            anyResultsForSem = await SemesterResult.exists({ academicSemesterId: currentSemesterMatch.academicSemesterId });
+        if (targetSemesterCode && totalScopedStudents > 0) {
+            const existsAgg = await SemesterResult.aggregate([
+               { $match: matchStage },
+               { $lookup: { from: 'semesters', localField: 'academicSemesterId', foreignField: '_id', as: 'sem' } },
+               { $unwind: '$sem' },
+               { $match: { 'sem.semesterCode': targetSemesterCode } },
+               { $limit: 1 }
+            ]);
+            anyResultsForSem = existsAgg.length > 0;
         }
 
         if (anyResultsForSem) {
@@ -568,13 +594,19 @@ class AnalyticsService {
     else if (maxYear === 3) availableSemesters = ['1-1', '1-2', '2-1', '2-2'];
     else if (maxYear === 4) availableSemesters = ['1-1', '1-2', '2-1', '2-2', '3-1', '3-2', '4-1'];
 
-    const baseMatch = { ...matchStage, ...(query.academicSemesterId ? { academicSemesterId: new mongoose.Types.ObjectId(query.academicSemesterId) } : {}) };
+    const baseMatch = { ...matchStage };
+    let targetSemesterCode = '';
+    if (query.academicSemesterId) {
+        const SemesterModel = mongoose.models.Semester || mongoose.model('Semester');
+        const targetSem = await SemesterModel.findById(query.academicSemesterId);
+        if (targetSem) targetSemesterCode = targetSem.semesterCode;
+    }
 
     const semPipeline = [
       { $match: baseMatch },
       { $lookup: { from: 'semesters', localField: 'academicSemesterId', foreignField: '_id', as: 'sem' } },
       { $unwind: { path: '$sem', preserveNullAndEmptyArrays: true } },
-      ...(query.academicSemesterId ? [] : [{ $match: { 'sem.semesterCode': { $in: availableSemesters } } }])
+      ...(targetSemesterCode ? [{ $match: { 'sem.semesterCode': targetSemesterCode } }] : [{ $match: { 'sem.semesterCode': { $in: availableSemesters } } }])
     ];
 
     const [statusDistRaw, semesterDistRaw, activeStatsRaw, activeTotalRaw] = await Promise.all([
@@ -741,10 +773,12 @@ class AnalyticsService {
     // Enrich EVERY cohort student with their historical semester backlog data
     const backlogsAgg = await Backlog.aggregate([
       { $match: { 
-          academicSemesterId: new mongoose.Types.ObjectId(query.academicSemesterId),
           studentId: { $in: studentIds },
           status: 'ACTIVE'
       }},
+      { $lookup: { from: 'semesters', localField: 'academicSemesterId', foreignField: '_id', as: 'sem' } },
+      { $unwind: { path: '$sem', preserveNullAndEmptyArrays: true } },
+      { $match: { 'sem.semesterCode': sem.semesterCode } },
       { $group: { _id: '$studentId', count: { $sum: 1 } } }
     ]);
     const backlogMap = new Map(backlogsAgg.map(b => [b._id.toString(), b.count]));

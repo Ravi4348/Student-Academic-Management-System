@@ -23,10 +23,12 @@ import {
   AlertCircle,
   AlertTriangle,
   Percent,
+  Activity,
 } from "lucide-react";
 import {
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -35,8 +37,35 @@ import {
   Legend,
   PieChart,
   Pie,
-  Cell,
 } from "recharts";
+
+const MetricsDisplay = ({ metrics }) => {
+  if (!metrics)
+    return (
+      <div className="text-sm text-slate-400 mt-2">Loading metrics...</div>
+    );
+  return (
+    <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-y-2 text-sm">
+      <div className="flex items-center text-slate-600">
+        <Users className="w-4 h-4 mr-2" />
+        <span className="font-medium mr-1">Students:</span>{" "}
+        {metrics.students || 0}
+      </div>
+      <div className="flex items-center text-slate-600">
+        <BookOpen className="w-4 h-4 mr-2" />
+        <span className="font-medium mr-1">
+          Active Backlog Subjects:
+        </span>{" "}
+        {metrics.activeBacklogSubjects || 0}
+      </div>
+      <div className="flex items-center text-amber-600 col-span-2">
+        <AlertTriangle className="w-4 h-4 mr-2" />
+        <span className="font-medium mr-1">At-Risk:</span>{" "}
+        {metrics.atRisk || 0}
+      </div>
+    </div>
+  );
+};
 
 export const DrillDown = () => {
   const [level, setLevel] = useState(0);
@@ -364,49 +393,21 @@ export const DrillDown = () => {
     if (level === 5) loadClassAnalytics();
   }, [level, selectedClass]);
 
-  const MetricsDisplay = ({ metrics }) => {
-    if (!metrics)
-      return (
-        <div className="text-sm text-slate-400 mt-2">Loading metrics...</div>
-      );
-    return (
-      <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-y-2 text-sm">
-        <div className="flex items-center text-slate-600">
-          <Users className="w-4 h-4 mr-2" />
-          <span className="font-medium mr-1">Students:</span>{" "}
-          {metrics.students || 0}
-        </div>
-        <div className="flex items-center text-slate-600">
-          <BookOpen className="w-4 h-4 mr-2" />
-          <span className="font-medium mr-1">
-            Active Backlog Subjects:
-          </span>{" "}
-          {metrics.activeBacklogSubjects || 0}
-        </div>
-        <div className="flex items-center text-amber-600 col-span-2">
-          <AlertTriangle className="w-4 h-4 mr-2" />
-          <span className="font-medium mr-1">At-Risk:</span>{" "}
-          {metrics.atRisk || 0}
-        </div>
-      </div>
-    );
-  };
-
-  const Breadcrumbs = () => (
-    <div className="flex items-center flex-wrap text-sm font-medium text-slate-500 mb-6 bg-slate-50 p-3 rounded-lg border border-slate-200">
+  const renderBreadcrumbs = () => (
+    <div className="flex items-center flex-wrap text-xs sm:text-sm font-semibold text-[#052659] mb-4 bg-gradient-to-r from-[#d9ebf9] via-[#e5f1fc] to-[#d9ebf9] p-3.5 rounded-xl border border-[#7DA0CA]/45 shadow-xs">
       <button
         onClick={() => setLevel(0)}
-        className={`hover:text-primary transition-colors ${level === 0 ? "text-primary" : ""}`}
+        className={`hover:text-[#0090FF] transition-colors ${level === 0 ? "text-[#052659] font-extrabold" : "text-[#0A3670]"}`}
       >
         Campuses
       </button>
 
       {level > 0 && selectedCampus && (
         <>
-          <ChevronRight className="w-4 h-4 mx-2" />
+          <ChevronRight className="w-4 h-4 mx-2 text-[#5483B3]" />
           <button
             onClick={() => setLevel(1)}
-            className={`hover:text-primary transition-colors ${level === 1 ? "text-primary" : ""}`}
+            className={`hover:text-[#0090FF] transition-colors ${level === 1 ? "text-[#052659] font-extrabold" : "text-[#0A3670]"}`}
           >
             {selectedCampus.name}
           </button>
@@ -415,10 +416,10 @@ export const DrillDown = () => {
 
       {level > 1 && selectedBranch && (
         <>
-          <ChevronRight className="w-4 h-4 mx-2" />
+          <ChevronRight className="w-4 h-4 mx-2 text-[#5483B3]" />
           <button
             onClick={() => setLevel(2)}
-            className={`hover:text-primary transition-colors ${level === 2 ? "text-primary" : ""}`}
+            className={`hover:text-[#0090FF] transition-colors ${level === 2 ? "text-[#052659] font-extrabold" : "text-[#0A3670]"}`}
           >
             {selectedBranch.name || selectedBranch.code}
           </button>
@@ -427,10 +428,10 @@ export const DrillDown = () => {
 
       {level > 2 && selectedYear && (
         <>
-          <ChevronRight className="w-4 h-4 mx-2" />
+          <ChevronRight className="w-4 h-4 mx-2 text-[#5483B3]" />
           <button
             onClick={() => setLevel(3)}
-            className={`hover:text-primary transition-colors ${level === 3 ? "text-primary" : ""}`}
+            className={`hover:text-[#0090FF] transition-colors ${level === 3 ? "text-[#052659] font-extrabold" : "text-[#0A3670]"}`}
           >
             Year {selectedYear}
           </button>
@@ -439,10 +440,10 @@ export const DrillDown = () => {
 
       {level > 3 && selectedSemester && (
         <>
-          <ChevronRight className="w-4 h-4 mx-2" />
+          <ChevronRight className="w-4 h-4 mx-2 text-[#5483B3]" />
           <button
             onClick={() => setLevel(4)}
-            className={`hover:text-primary transition-colors ${level === 4 ? "text-primary" : ""}`}
+            className={`hover:text-[#0090FF] transition-colors ${level === 4 ? "text-[#052659] font-extrabold" : "text-[#0A3670]"}`}
           >
             {selectedSemester.semesterCode}
           </button>
@@ -451,8 +452,8 @@ export const DrillDown = () => {
 
       {level > 4 && selectedClass && (
         <>
-          <ChevronRight className="w-4 h-4 mx-2" />
-          <span className="text-primary">
+          <ChevronRight className="w-4 h-4 mx-2 text-[#5483B3]" />
+          <span className="text-[#052659] font-extrabold">
             {selectedClass.name === "Class"
               ? "Class"
               : `Class ${selectedClass.name}`}
@@ -469,7 +470,29 @@ export const DrillDown = () => {
         description="Navigate securely from campus level down to individual student rosters."
       />
 
-      <Breadcrumbs />
+      {/* Drill-Down Announcement / Information Banner with stronger visual hierarchy */}
+      <div className="bg-gradient-to-r from-[#e1effa] via-[#eaf4fd] to-[#e1effa] border border-[#5483B3]/40 rounded-xl p-3.5 mb-4 shadow-xs flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-[#052659] text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Activity className="w-4 h-4 text-[#C1E8FF]" />
+          </div>
+          <div>
+            <h4 className="text-xs font-extrabold uppercase tracking-wide text-[#021024]">
+              Institutional Drill-Down Analytics Navigation
+            </h4>
+            <p className="text-xs text-[#052659] font-medium">
+              Explore tier-by-tier telemetry across Campuses, Branches, Cohorts, and Class Rosters.
+            </p>
+          </div>
+        </div>
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#052659] text-white shadow-2xs">
+            Active Tier: {level === 0 ? "Campus" : level === 1 ? "Branch" : level === 2 ? "Year" : level === 3 ? "Semester" : level === 4 ? "Class" : "Student Roster"}
+          </span>
+        </div>
+      </div>
+
+      {renderBreadcrumbs()}
 
       {isLoading ? (
         <LoadingSkeleton type="table" />
@@ -479,7 +502,9 @@ export const DrillDown = () => {
           onRetry={() => setLevel(Math.max(0, level - 1))}
         />
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+        <div className="bg-gradient-to-br from-white via-[#fcfdff] to-[#f4f9fd] rounded-2xl shadow-xs border border-[#7DA0CA]/35 overflow-hidden min-h-[400px] relative">
+          {/* Subtle decorative shape */}
+          <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#C1E8FF]/20 blur-xl pointer-events-none" />
           {/* Level 0: Campuses */}
           {level === 0 && (
             <div className="p-6">
@@ -796,6 +821,16 @@ export const DrillDown = () => {
                             data={classMetrics.backlogStatus}
                             margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                           >
+                            <defs>
+                              <linearGradient id="drillActiveGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#0090FF" stopOpacity={0.95} />
+                                <stop offset="100%" stopColor="#052659" stopOpacity={1} />
+                              </linearGradient>
+                              <linearGradient id="drillClearedGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#34d399" />
+                                <stop offset="100%" stopColor="#065f46" />
+                              </linearGradient>
+                            </defs>
                             <CartesianGrid
                               strokeDasharray="3 3"
                               vertical={false}
@@ -821,15 +856,15 @@ export const DrillDown = () => {
                                 boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                               }}
                             />
-                            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                               {classMetrics.backlogStatus.map(
                                 (entry, index) => (
                                   <Cell
                                     key={`cell-${index}`}
                                     fill={
                                       entry.name === "Active"
-                                        ? "#ef4444"
-                                        : "#10b981"
+                                        ? "url(#drillActiveGrad)"
+                                        : "url(#drillClearedGrad)"
                                     }
                                   />
                                 ),
@@ -859,6 +894,12 @@ export const DrillDown = () => {
                             data={classMetrics.academicPerformance}
                             margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                           >
+                            <defs>
+                              <linearGradient id="drillAvgMarksGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#0090FF" />
+                                <stop offset="100%" stopColor="#052659" />
+                              </linearGradient>
+                            </defs>
                             <CartesianGrid
                               strokeDasharray="3 3"
                               vertical={false}
@@ -890,8 +931,8 @@ export const DrillDown = () => {
                             />
                             <Bar
                               dataKey="averageMarks"
-                              fill="#6366f1"
-                              radius={[4, 4, 0, 0]}
+                              fill="url(#drillAvgMarksGrad)"
+                              radius={[6, 6, 0, 0]}
                               name="Average Marks"
                             />
                           </BarChart>

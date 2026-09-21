@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {
-  PageHeader,
   StatCard,
   LoadingSkeleton,
   ErrorState,
   ChartCard,
+  AcademicProfileHero,
 } from "@/components/common";
 import { HODFilterBar } from "../components/HODFilterBar";
 import { analyticsService } from "@/services/analyticsService";
@@ -18,6 +18,16 @@ import {
   Legend,
 } from "recharts";
 import { useAuth } from "@/providers/AuthProvider";
+import { getAvatarUrl } from "@/utils/urlUtils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -75,13 +85,24 @@ export const Dashboard = () => {
 
   return (
     <>
-      <PageHeader
-        title={
-          scopeYear
-            ? `Department Dashboard — Year ${scopeYear}`
-            : "Department Dashboard"
+      {/* 1. HOD Academic Profile Hero Banner */}
+      <AcademicProfileHero
+        title="HOD Academic Profile"
+        icon={GraduationCap}
+        name={
+          user?.firstName
+            ? `${user.firstName} ${user.lastName || ""}`.trim()
+            : user?.username || "Head of Department"
         }
-        description="High-level overview of department performance and KPIs."
+        avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
+        fallbackText={(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "H").toUpperCase()}
+        badges={[
+          { label: "Department Executive Leadership" },
+          { label: scopeYear ? `Supervising: Year ${scopeYear}` : "All Department Cohorts" },
+          { label: "Academic Session 2025–2026", highlight: true, dotColor: "bg-emerald-400" },
+        ]}
+        visionTitle="Department Vision"
+        visionWords={["Lead", "Innovate", "Excel"]}
       />
 
       <HODFilterBar onFilterChange={handleFilterChange} />
@@ -181,51 +202,48 @@ export const Dashboard = () => {
               title="Branch Distribution (Students)"
               description="Number of students per branch"
             >
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-3">Branch</th>
-                      <th className="px-4 py-3 text-right">Students</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
+              <div className="border border-[#7DA0CA]/30 rounded-xl overflow-hidden shadow-2xs">
+                <Table>
+                  <TableHeader className="bg-gradient-to-r from-[#052659] via-[#083375] to-[#052659] border-b border-[#052659]">
+                    <TableRow className="hover:bg-transparent border-0">
+                      <TableHead className="text-white font-extrabold text-[11px] uppercase tracking-wider py-2.5">Branch</TableHead>
+                      <TableHead className="text-right text-white font-extrabold text-[11px] uppercase tracking-wider py-2.5">Students</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {kpis?.studentBranches?.map((b) => (
-                      <tr
-                        key={b.branchCode}
-                        className="hover:bg-slate-50 transition-colors"
-                      >
-                        <td className="px-4 py-3 font-medium text-slate-700">
+                      <TableRow key={b.branchCode} className="hover:bg-[#C1E8FF]/20 odd:bg-white even:bg-[#f8fbfe]/80 transition-colors border-b border-[#7DA0CA]/15 last:border-0">
+                        <TableCell className="font-semibold text-xs text-[#021024] py-2.5">
                           {b.branchName} ({b.branchCode})
-                        </td>
-                        <td className="px-4 py-3 text-right text-slate-600">
+                        </TableCell>
+                        <TableCell className="text-right text-xs font-bold text-[#052659] py-2.5">
                           {b.count}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
                     {(!kpis?.studentBranches ||
                       kpis.studentBranches.length === 0) && (
-                      <tr>
-                        <td
+                      <TableRow>
+                        <TableCell
                           colSpan={2}
-                          className="px-4 py-8 text-center text-slate-500"
+                          className="py-8 text-center text-xs text-muted-foreground"
                         >
                           No data available
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     )}
-                  </tbody>
+                  </TableBody>
                   {kpis?.studentBranches && kpis.studentBranches.length > 0 && (
-                    <tfoot className="bg-slate-50 font-semibold border-t border-slate-200">
-                      <tr>
-                        <td className="px-4 py-3 text-slate-800">Total</td>
-                        <td className="px-4 py-3 text-right text-slate-800">
+                    <TableFooter className="bg-[#f0f7fc]/80 border-t border-[#7DA0CA]/30">
+                      <TableRow>
+                        <TableCell className="font-extrabold text-xs text-[#021024]">Total</TableCell>
+                        <TableCell className="text-right font-extrabold text-xs text-[#052659]">
                           {kpis.totalStudents}
-                        </td>
-                      </tr>
-                    </tfoot>
+                        </TableCell>
+                      </TableRow>
+                    </TableFooter>
                   )}
-                </table>
+                </Table>
               </div>
             </ChartCard>
           </div>
@@ -235,51 +253,48 @@ export const Dashboard = () => {
               title="Branch Distribution (Backlogs)"
               description="Active backlogs per branch"
             >
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-3">Branch</th>
-                      <th className="px-4 py-3 text-right">Backlogs</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
+              <div className="border border-[#7DA0CA]/30 rounded-xl overflow-hidden shadow-2xs">
+                <Table>
+                  <TableHeader className="bg-gradient-to-r from-[#052659] via-[#083375] to-[#052659] border-b border-[#052659]">
+                    <TableRow className="hover:bg-transparent border-0">
+                      <TableHead className="text-white font-extrabold text-[11px] uppercase tracking-wider py-2.5">Branch</TableHead>
+                      <TableHead className="text-right text-white font-extrabold text-[11px] uppercase tracking-wider py-2.5">Backlogs</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {kpis?.backlogBranches?.map((b) => (
-                      <tr
-                        key={b.branchCode}
-                        className="hover:bg-slate-50 transition-colors"
-                      >
-                        <td className="px-4 py-3 font-medium text-slate-700">
+                      <TableRow key={b.branchCode} className="hover:bg-[#C1E8FF]/20 odd:bg-white even:bg-[#f8fbfe]/80 transition-colors border-b border-[#7DA0CA]/15 last:border-0">
+                        <TableCell className="font-semibold text-xs text-[#021024] py-2.5">
                           {b.branchName} ({b.branchCode})
-                        </td>
-                        <td className="px-4 py-3 text-right text-slate-600">
+                        </TableCell>
+                        <TableCell className="text-right text-xs font-bold text-rose-700 py-2.5">
                           {b.count}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
                     {(!kpis?.backlogBranches ||
                       kpis.backlogBranches.length === 0) && (
-                      <tr>
-                        <td
+                      <TableRow>
+                        <TableCell
                           colSpan={2}
-                          className="px-4 py-8 text-center text-slate-500"
+                          className="py-8 text-center text-xs text-muted-foreground"
                         >
                           No data available
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     )}
-                  </tbody>
+                  </TableBody>
                   {kpis?.backlogBranches && kpis.backlogBranches.length > 0 && (
-                    <tfoot className="bg-slate-50 font-semibold border-t border-slate-200">
-                      <tr>
-                        <td className="px-4 py-3 text-slate-800">Total</td>
-                        <td className="px-4 py-3 text-right text-slate-800">
+                    <TableFooter className="bg-[#f0f7fc]/80 border-t border-[#7DA0CA]/30">
+                      <TableRow>
+                        <TableCell className="font-extrabold text-xs text-[#021024]">Total</TableCell>
+                        <TableCell className="text-right font-extrabold text-xs text-rose-700">
                           {kpis.totalBacklogs}
-                        </td>
-                      </tr>
-                    </tfoot>
+                        </TableCell>
+                      </TableRow>
+                    </TableFooter>
                   )}
-                </table>
+                </Table>
               </div>
             </ChartCard>
           </div>

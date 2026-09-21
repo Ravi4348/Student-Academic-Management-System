@@ -24,6 +24,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const CustomTooltip = ({ active, payload, label, metric }) => {
+  if (active && payload && payload.length) {
+    const val = payload[0].value;
+    let displayVal = val;
+    if (val === "Not Available") displayVal = "Not Available";
+    else if (metric === "Pass %" || metric === "Average Marks")
+      displayVal = `${val}%`;
+
+    return (
+      <div className="bg-white p-3 border border-slate-200 shadow-sm rounded-lg">
+        <p className="font-medium text-slate-800 mb-1">{label}</p>
+        <p className="text-sm" style={{ color: payload[0].fill }}>
+          {metric}: <span className="font-bold">{displayVal}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export const Years = () => {
   const [data, setData] = useState([]);
   const [metric, setMetric] = useState("Students");
@@ -58,26 +78,6 @@ export const Years = () => {
   useEffect(() => {
     loadData();
   }, []);
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const val = payload[0].value;
-      let displayVal = val;
-      if (val === "Not Available") displayVal = "Not Available";
-      else if (metric === "Pass %" || metric === "Average Marks")
-        displayVal = `${val}%`;
-
-      return (
-        <div className="bg-white p-3 border border-slate-200 shadow-sm rounded-lg">
-          <p className="font-medium text-slate-800 mb-1">{label}</p>
-          <p className="text-sm" style={{ color: payload[0].fill }}>
-            {metric}: <span className="font-bold">{displayVal}</span>
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   const isDataEmpty = () => {
     if (data.length === 0) return true;
@@ -149,6 +149,12 @@ export const Years = () => {
                   data={data}
                   margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                 >
+                  <defs>
+                    <linearGradient id="yearsMetricGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0090FF" />
+                      <stop offset="100%" stopColor="#052659" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
@@ -165,12 +171,12 @@ export const Years = () => {
                     axisLine={false}
                     tickLine={false}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip metric={metric} />} />
                   <Legend />
                   <Bar
                     dataKey={metric}
-                    fill="#6366f1"
-                    radius={[4, 4, 0, 0]}
+                    fill="url(#yearsMetricGrad)"
+                    radius={[6, 6, 0, 0]}
                     name={metric}
                   />
                 </BarChart>

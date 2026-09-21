@@ -12,3 +12,5 @@ export * from "./SearchFilterBar";
 export * from "./ChartCard";
 export * from "./NotificationPanel";
 export * from "./ExportButton";
+export * from "./AcademicProfileHero";
+export * from "./ErrorBoundary";

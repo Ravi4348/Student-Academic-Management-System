@@ -143,7 +143,7 @@ export const ResultImport = () => {
                 type="file"
                 id="result-file"
                 className="hidden"
-                accept=".pdf,.csv"
+                accept=".pdf"
                 onChange={handleFileChange}
               />
 
@@ -156,7 +156,7 @@ export const ResultImport = () => {
                   Click to browse
                 </span>
                 <span className="text-xs text-slate-500 mt-1">
-                  PDF or CSV up to 10MB
+                  PDF up to 10MB
                 </span>
               </label>
 

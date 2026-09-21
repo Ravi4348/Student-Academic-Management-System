@@ -61,7 +61,7 @@ export const GuestLectures = () => {
       ) : error ? (
         <ErrorState message={error} onRetry={loadData} />
       ) : lectures.length > 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xs border border-[#7DA0CA]/35 overflow-hidden">
           <DataTable
             data={lectures}
             columns={columns}
@@ -69,14 +69,14 @@ export const GuestLectures = () => {
           />
         </div>
       ) : (
-        <div className="bg-white p-12 text-center rounded-xl shadow-sm border border-slate-200">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+        <div className="bg-white p-12 text-center rounded-2xl shadow-xs border border-[#7DA0CA]/35">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#C1E8FF]/40 text-[#052659] mb-4">
             <span className="text-2xl">🎤</span>
           </div>
-          <h3 className="text-lg font-medium text-slate-800 mb-1">
+          <h3 className="text-base font-bold text-[#021024] mb-1">
             No Upcoming Lectures
           </h3>
-          <p className="text-slate-500">
+          <p className="text-xs text-[#5483B3] font-medium">
             There are currently no guest lectures scheduled for your batch.
           </p>
         </div>

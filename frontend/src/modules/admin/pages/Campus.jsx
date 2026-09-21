@@ -8,6 +8,15 @@ import {
 import { campusService } from "@/services/campusService";
 import { Plus, Loader2, Pencil, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Campus = () => {
   const [campuses, setCampuses] = useState([]);
@@ -187,103 +196,87 @@ export const Campus = () => {
       )}
 
       {/* Campus Creation/Edit Modal */}
-      {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold">
-                {editId ? "Edit Campus" : "Add New Campus"}
-              </h2>
-              <button
-                onClick={() => !isSaving && setIsDialogOpen(false)}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editId ? "Edit Campus" : "Add New Campus"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+            {saveError && (
+              <div className="p-3 bg-rose-50 text-rose-600 text-sm font-medium rounded-md border border-rose-100">
+                {saveError}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>
+                Campus Name <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                placeholder="e.g. Main Campus"
                 disabled={isSaving}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                ×
-              </button>
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {saveError && (
-                <div className="p-3 bg-rose-50 text-rose-600 text-sm font-medium rounded-md border border-rose-100">
-                  {saveError}
-                </div>
-              )}
+            <div className="space-y-2">
+              <Label>Code</Label>
+              <Input
+                type="text"
+                value={formData.code}
+                onChange={(e) =>
+                  setFormData({ ...formData, code: e.target.value })
+                }
+                placeholder="e.g. MC"
+                disabled={isSaving}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Campus Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. Main Campus"
-                  disabled={isSaving}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Location</Label>
+              <Input
+                type="text"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+                placeholder="e.g. New York, NY"
+                disabled={isSaving}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Code
-                </label>
-                <input
-                  type="text"
-                  value={formData.code}
-                  onChange={(e) =>
-                    setFormData({ ...formData, code: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. MC"
-                  disabled={isSaving}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) =>
-                    setFormData({ ...formData, location: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. New York, NY"
-                  disabled={isSaving}
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsDialogOpen(false)}
-                  disabled={isSaving}
-                  className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {isSaving
-                    ? "Saving..."
-                    : editId
-                      ? "Update Campus"
-                      : "Save Campus"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <div className="flex justify-end gap-3 pt-4 border-t mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+              >
+                {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isSaving
+                  ? "Saving..."
+                  : editId
+                    ? "Update Campus"
+                    : "Save Campus"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

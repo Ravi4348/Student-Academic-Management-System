@@ -38,7 +38,7 @@ const sendRemedialNotifications = async (remedialClass, isUpdate = false) => {
 
 exports.getEligibleStudents = async (req, res) => {
   try {
-    const { subjectId, targetYear, targetSection } = req.query;
+    const { subjectId, targetYear, targetSection, targetBranch } = req.query;
 
     if (!subjectId) {
       return res.status(400).json({ status: 'error', message: 'Subject ID is required to find eligible backlog students' });
@@ -54,6 +54,7 @@ exports.getEligibleStudents = async (req, res) => {
     const studentQuery = { _id: { $in: studentIdsWithBacklog } };
     if (targetYear) studentQuery.year = targetYear;
     if (targetSection) studentQuery.sectionId = targetSection;
+    if (targetBranch) studentQuery.branchId = targetBranch;
 
     const eligibleStudents = await Student.find(studentQuery)
       .populate('branchId', 'code name')

@@ -1,4 +1,6 @@
 # Result Processor Dependencies
-pdfplumber==0.10.3
-pandas==2.1.4
-PyMuPDF==1.23.8
+pdfplumber
+pandas
+PyMuPDF
+pytesseract
+Pillow

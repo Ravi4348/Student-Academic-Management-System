@@ -110,7 +110,7 @@ exports.updateProfile = async (req, res, next) => {
         normalizedEmail = undefined; // Undefined tells Mongoose to omit or unset
         userDoc.email = undefined;
       } else {
-        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(normalizedEmail)) {
           return sendError(res, 'Invalid email format.', 400);
         }

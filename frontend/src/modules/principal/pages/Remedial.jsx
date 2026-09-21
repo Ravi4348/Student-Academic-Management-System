@@ -107,6 +107,12 @@ export const Remedial = () => {
                   data={data.remedialDist}
                   margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                 >
+                  <defs>
+                    <linearGradient id="remedialDistGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#818cf8" />
+                      <stop offset="100%" stopColor="#052659" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
@@ -134,8 +140,8 @@ export const Remedial = () => {
                   <Legend />
                   <Bar
                     dataKey="value"
-                    fill="#8b5cf6"
-                    radius={[4, 4, 0, 0]}
+                    fill="url(#remedialDistGrad)"
+                    radius={[6, 6, 0, 0]}
                     name="Sessions"
                   />
                 </BarChart>

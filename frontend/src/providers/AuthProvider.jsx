@@ -52,8 +52,22 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
+    
+    const handleProfileUpdate = () => {
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error("Failed to parse updated user from storage", e);
+        }
+      }
+    };
+    window.addEventListener("userProfileUpdated", handleProfileUpdate);
+    
     return () => {
       mounted = false;
+      window.removeEventListener("userProfileUpdated", handleProfileUpdate);
     };
   }, []);
 

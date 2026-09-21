@@ -11,29 +11,6 @@ export const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef(null);
 
-  useEffect(() => {
-    const img = new Image();
-    img.src = imageSrc;
-    img.onload = () => {
-      imageRef.current = img;
-      // Initial scale to fit the canvas width
-      if (containerRef.current) {
-        const size = containerRef.current.offsetWidth;
-        const initialScale = Math.max(size / img.width, size / img.height);
-        setScale(initialScale);
-        // Center the image
-        setPosition({
-          x: (size - img.width * initialScale) / 2,
-          y: (size - img.height * initialScale) / 2,
-        });
-        drawCanvas(img, initialScale, {
-          x: (size - img.width * initialScale) / 2,
-          y: (size - img.height * initialScale) / 2,
-        });
-      }
-    };
-  }, [imageSrc]);
-
   const drawCanvas = (img, currentScale, currentPos) => {
     if (!canvasRef.current || !containerRef.current) return;
     const canvas = canvasRef.current;
@@ -63,6 +40,29 @@ export const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
     ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
     ctx.fill("evenodd");
   };
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = imageSrc;
+    img.onload = () => {
+      imageRef.current = img;
+      // Initial scale to fit the canvas width
+      if (containerRef.current) {
+        const size = containerRef.current.offsetWidth;
+        const initialScale = Math.max(size / img.width, size / img.height);
+        setScale(initialScale);
+        // Center the image
+        setPosition({
+          x: (size - img.width * initialScale) / 2,
+          y: (size - img.height * initialScale) / 2,
+        });
+        drawCanvas(img, initialScale, {
+          x: (size - img.width * initialScale) / 2,
+          y: (size - img.height * initialScale) / 2,
+        });
+      }
+    };
+  }, [imageSrc]);
 
   const handleMouseDown = (e) => {
     setIsDragging(true);

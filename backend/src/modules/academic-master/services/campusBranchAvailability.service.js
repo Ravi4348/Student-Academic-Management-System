@@ -30,6 +30,12 @@ class CampusBranchAvailabilityService {
     }
     return await CampusBranchAvailability.findByIdAndUpdate(id, data, { new: true, runValidators: true }).populate('campusId branchId');
   }
+
+  static async deleteAvailability(id) {
+    const result = await CampusBranchAvailability.findByIdAndDelete(id);
+    if (!result) throw new Error('Availability not found');
+    return result;
+  }
 }
 
 module.exports = CampusBranchAvailabilityService;

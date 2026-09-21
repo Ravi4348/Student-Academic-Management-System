@@ -107,6 +107,12 @@ export const GuestLectures = () => {
                   data={data.lectureDist}
                   margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                 >
+                  <defs>
+                    <linearGradient id="lectureDistGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0090FF" />
+                      <stop offset="100%" stopColor="#052659" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
@@ -134,8 +140,8 @@ export const GuestLectures = () => {
                   <Legend />
                   <Bar
                     dataKey="value"
-                    fill="#ec4899"
-                    radius={[4, 4, 0, 0]}
+                    fill="url(#lectureDistGrad)"
+                    radius={[6, 6, 0, 0]}
                     name="Lectures"
                   />
                 </BarChart>

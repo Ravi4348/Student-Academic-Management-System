@@ -8,6 +8,16 @@ import {
 import { academicConfigService } from "@/services/academicConfigService";
 import { Plus, Loader2, Pencil } from "lucide-react";
 import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const AcademicYears = () => {
   const [years, setYears] = useState([]);
@@ -177,118 +187,104 @@ export const AcademicYears = () => {
       )}
 
       {/* Creation/Edit Modal */}
-      {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold">
-                {editId ? "Edit Academic Year" : "Add Academic Year"}
-              </h2>
-              <button
-                onClick={() => !isSaving && setIsDialogOpen(false)}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editId ? "Edit Academic Year" : "Add Academic Year"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+            {saveError && (
+              <div className="p-3 bg-rose-50 text-rose-600 text-sm font-medium rounded-md border border-rose-100">
+                {saveError}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>
+                Academic Year <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                type="text"
+                value={formData.academicYear}
+                onChange={(e) =>
+                  setFormData({ ...formData, academicYear: e.target.value })
+                }
+                placeholder="e.g. 2026-2027"
                 disabled={isSaving}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                ×
-              </button>
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {saveError && (
-                <div className="p-3 bg-rose-50 text-rose-600 text-sm font-medium rounded-md border border-rose-100">
-                  {saveError}
-                </div>
-              )}
-
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Academic Year <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.academicYear}
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={formData.startDate}
                   onChange={(e) =>
-                    setFormData({ ...formData, academicYear: e.target.value })
+                    setFormData({ ...formData, startDate: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. 2026-2027"
                   disabled={isSaving}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, startDate: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                    disabled={isSaving}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, endDate: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                    disabled={isSaving}
-                  />
-                </div>
-              </div>
-
-              {editId && (
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) =>
-                        setFormData({ ...formData, isActive: e.target.checked })
-                      }
-                      className="rounded border-slate-300 text-primary focus:ring-primary"
-                    />
-                    Is Active?
-                  </label>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4 border-t mt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsDialogOpen(false)}
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endDate: e.target.value })
+                  }
                   disabled={isSaving}
-                  className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {isSaving
-                    ? "Saving..."
-                    : editId
-                      ? "Update Year"
-                      : "Save Year"}
-                </button>
+                />
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+
+            {editId && (
+              <div className="flex items-center space-x-2 pt-2">
+                <Checkbox
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) =>
+                    setFormData({
+                      ...formData,
+                      isActive: Boolean(checked),
+                    })
+                  }
+                />
+                <Label htmlFor="isActive" className="cursor-pointer">
+                  Is Active?
+                </Label>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-4 border-t mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+              >
+                {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isSaving
+                  ? "Saving..."
+                  : editId
+                    ? "Update Year"
+                    : "Save Year"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

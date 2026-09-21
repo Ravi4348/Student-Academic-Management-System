@@ -17,7 +17,8 @@ const protect = async (req, res, next) => {
       req.user = decoded;
       
       // --- ENFORCE CTPO SCOPE GLOBALLY ---
-      if (req.user.role === 'CTPO') {
+      const isAuthEndpoint = (req.originalUrl || req.url || "").includes("/api/auth");
+      if (req.user.role === 'CTPO' && !isAuthEndpoint) {
         const assignment = await CtpoAssignment.findOne({ ctpoUserId: req.user.id || req.user._id, status: 'ACTIVE' }).populate('semesterId');
         if (!assignment) {
           return sendError(res, 'Not authorized, CTPO assignment inactive or missing', 403);

@@ -7,35 +7,35 @@ const riskConfig = {
   high: {
     icon: ShieldAlert,
     label: "High Risk",
-    classes: "bg-rose-100 text-rose-800 hover:bg-rose-100 border-rose-200",
+    classes: "bg-rose-50 text-rose-700 hover:bg-rose-50 border-rose-200",
   },
   medium: {
     icon: Shield,
     label: "Medium Risk",
-    classes: "bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200",
+    classes: "bg-amber-50 text-amber-700 hover:bg-amber-50 border-amber-200",
   },
   low: {
     icon: ShieldCheck,
     label: "Low Risk",
-    classes:
-      "bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-emerald-200",
+    classes: "bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200",
   },
 };
 
 export const RiskBadge = ({ level, className }) => {
-  const config = riskConfig[level];
+  const normalizedLevel = (level || "low").toLowerCase();
+  const config = riskConfig[normalizedLevel] || riskConfig.low;
   const Icon = config.icon;
 
   return (
     <Badge
       variant="outline"
       className={cn(
-        "px-2.5 py-0.5 rounded-md font-medium flex items-center gap-1.5",
+        "px-2 py-0.5 rounded-md font-semibold text-[11px] inline-flex items-center gap-1 shadow-2xs",
         config.classes,
         className,
       )}
     >
-      <Icon className="h-3.5 w-3.5" />
+      <Icon className="h-3 w-3" />
       {config.label}
     </Badge>
   );

@@ -196,6 +196,12 @@ export const Performance = () => {
                     data={trends}
                     margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                   >
+                    <defs>
+                      <linearGradient id="ctpoAvgMarksGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0090FF" />
+                        <stop offset="100%" stopColor="#052659" />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
@@ -224,8 +230,8 @@ export const Performance = () => {
                     <Legend />
                     <Bar
                       dataKey="averageMarks"
-                      fill="#3b82f6"
-                      radius={[4, 4, 0, 0]}
+                      fill="url(#ctpoAvgMarksGrad)"
+                      radius={[6, 6, 0, 0]}
                       name="Average Marks"
                     />
                   </BarChart>

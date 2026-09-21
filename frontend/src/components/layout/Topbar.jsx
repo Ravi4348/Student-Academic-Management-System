@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { getAvatarUrl } from "@/utils/urlUtils";
-import { Bell, User, LogOut, Menu } from "lucide-react";
+import { Bell, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuth } from "@/providers/AuthProvider";
 import { authService } from "@/services/authService";
 import { useNavigate } from "react-router-dom";
 import { notificationService } from "@/services/notificationService";
 import { studentService } from "@/services/studentService";
-import { DynamicBreadcrumb } from "./DynamicBreadcrumb";
 import { ProfileModal } from "../common/ProfileModal";
 
 export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
@@ -29,25 +25,32 @@ export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
   const [, setForceUpdate] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchUnread = async () => {
       try {
         if (user) {
           const count = await notificationService.getUnreadCount();
-          setUnreadCount(count);
+          if (isMounted) setUnreadCount(count);
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 60000); // Poll every minute
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchUnread, 60000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [user]);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchProfile = async () => {
       if (user?.role === "STUDENT") {
         try {
           const profileData = await studentService.getProfile();
-          if (profileData) {
+          if (isMounted && profileData) {
             setStudentProfile(profileData);
           }
         } catch (e) {
@@ -56,22 +59,21 @@ export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
       }
     };
     fetchProfile();
+
     const handleProfileUpdate = async () => {
-      setForceUpdate((prev) => prev + 1); // Force topbar to render avatar changes
+      setForceUpdate((prev) => prev + 1);
       try {
-        // Re-fetch me
-        const meData = await authService.validateToken();
-        if (meData && meData.user) {
-          // We update local storage user if using it
-          // but useAuth might not expose a direct set user method.
-          // Assuming it re-reads if we can trigger it, but for now we rely on the context updating or local storage.
-        }
-        fetchProfile(); // Re-fetch student profile
-      } catch (e) {}
+        await authService.validateToken();
+        fetchProfile();
+      } catch {
+        // ignore
+      }
     };
     window.addEventListener("userProfileUpdated", handleProfileUpdate);
-    return () =>
+    return () => {
+      isMounted = false;
       window.removeEventListener("userProfileUpdated", handleProfileUpdate);
+    };
   }, [user]);
 
   const handleLogout = () => {
@@ -97,196 +99,117 @@ export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
     navigate(`/${rolePath}/notifications`);
   };
 
-  return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 shadow-sm">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="md:hidden"
-        onClick={onMenuToggle}
-      >
-        <Menu className="h-5 w-5" />
-        <span className="sr-only">Toggle menu</span>
-      </Button>
+  const displayName =
+    user?.fullName ||
+    (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "") ||
+    (user?.role === "STUDENT" ? studentProfile?.name : null) ||
+    user?.username || 
+    "Academic User";
 
-      <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">
-        <h1 className="text-lg font-semibold md:text-xl shrink-0">{title}</h1>
-        <div className="hidden md:block border-l h-6 mx-2 border-slate-200"></div>
-        <div className="hidden md:block">
-          <DynamicBreadcrumb />
+  const userIdentifier =
+    user?.role === "STUDENT" && studentProfile?.rollNo
+      ? studentProfile.rollNo
+      : user?.username || "USER";
+
+  return (
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#7DA0CA]/35 bg-gradient-to-r from-[#f0f6fc]/95 via-[#eaf2fa]/95 to-[#f3f8fd]/95 backdrop-blur-md px-3.5 sm:px-5 shadow-2xs">
+      {/* Left side: Mobile menu toggle + Page title & subtitle matching Image 1 */}
+      <div className="flex items-center gap-3 min-w-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden text-[#052659] hover:bg-[#C1E8FF]/30 h-9 w-9"
+          onClick={onMenuToggle}
+          aria-label="Toggle Navigation Menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        <div className="flex items-center gap-2.5 truncate">
+          <h1 className="text-lg sm:text-xl font-bold text-[#021024] tracking-tight truncate">
+            {title}
+          </h1>
+          <span className="text-[#7DA0CA]/70 select-none font-light">|</span>
+          <span className="text-xs sm:text-sm font-medium text-slate-500 truncate">
+            {user?.role === "STUDENT" ? "Student Overview" : `${user?.role || "System"} Portal`}
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Notifications */}
-        {user?.role !== "PRINCIPAL" && user?.role !== "HOD" && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            onClick={goToNotifications}
-          >
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            {unreadCount > 0 && (
-              <Badge
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 rounded-full"
-                variant="destructive"
-              >
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </Badge>
-            )}
-            <span className="sr-only">Notifications</span>
-          </Button>
-        )}
+      {/* Right side: Notifications, Profile Pill, Direct Sign-out */}
+      <div className="flex items-center gap-3 shrink-0">
+        <TooltipProvider delayDuration={150}>
+          {user?.role !== "PRINCIPAL" && user?.role !== "HOD" && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative text-[#052659] hover:bg-[#C1E8FF]/40 hover:text-[#021024] h-9 w-9 rounded-lg"
+                  onClick={goToNotifications}
+                  aria-label="View notifications"
+                >
+                  <Bell className="h-4 w-4" />
+                  {unreadCount > 0 && user?.role !== "STUDENT" && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white shadow-xs">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Notifications</TooltipContent>
+            </Tooltip>
+          )}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={getAvatarUrl(user?.avatarFileId || user?.avatar)}
-                  alt="@user"
-                />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {(
-                    user?.firstName?.charAt(0) ||
-                    user?.username?.charAt(0) ||
-                    "U"
-                  ).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                {user?.role === "STUDENT" ? (
-                  <>
-                    <p className="text-sm font-medium leading-none text-slate-800">
-                      {studentProfile?.name ||
-                        (user?.firstName
-                          ? `${user.firstName} ${user.lastName || ""}`
-                          : user?.username)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Role: Student
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {studentProfile?.rollNo}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {studentProfile?.year
-                        ? `Year ${studentProfile.year} • Semester ${studentProfile?.semesterId?.semesterCode || "-"}`
-                        : ""}
-                    </p>
-                  </>
-                ) : user?.role === "ADMIN" ? (
-                  <>
-                    <p className="text-sm font-medium leading-none">
-                      {(user?.firstName
-                        ? `${user.firstName} ${user.lastName || ""}`
-                        : user?.username) || "Administrator"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Role: ADMIN
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      System-level scope
-                    </p>
-                  </>
-                ) : user?.role === "PRINCIPAL" ? (
-                  <>
-                    <p className="text-sm font-medium leading-none">
-                      {(user?.firstName
-                        ? `${user.firstName} ${user.lastName || ""}`
-                        : user?.username) || "Principal"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Role: PRINCIPAL
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Campus / Institution scope
-                    </p>
-                  </>
-                ) : user?.role === "COORDINATOR" ? (
-                  <>
-                    <p className="text-sm font-medium leading-none">
-                      {(user?.firstName
-                        ? `${user.firstName} ${user.lastName || ""}`
-                        : user?.username) || "Coordinator"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Role: COORDINATOR
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Academic Support scope
-                    </p>
-                  </>
-                ) : user?.role === "HOD" ? (
-                  <>
-                    <p className="text-sm font-medium leading-none">
-                      {(user?.firstName
-                        ? `${user.firstName} ${user.lastName || ""}`
-                        : user?.username) || "HOD"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Role: HOD
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Academic Year scope
-                    </p>
-                  </>
-                ) : user?.role === "CTPO" ? (
-                  <>
-                    <p className="text-sm font-medium leading-none">
-                      {(user?.firstName
-                        ? `${user.firstName} ${user.lastName || ""}`
-                        : user?.username) || "CTPO"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Role: CTPO
-                    </p>
-                    {user?.scope && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Branch:{" "}
-                        {user.scope.branch ||
-                          user.scope.branchId ||
-                          "Assigned Branch"}{" "}
-                        • Year {user.scope.year || "-"}
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium leading-none">
-                      {(user?.firstName
-                        ? `${user.firstName} ${user.lastName || ""}`
-                        : user?.username) || "User"}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground mt-1">
-                      {user?.role}
-                    </p>
-                  </>
-                )}
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setIsProfileModalOpen(true)}>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleLogout}
-              className="text-destructive"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* User Profile Direct Trigger matching Image 1 */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex items-center gap-2 py-1 px-2 rounded-xl transition-all hover:bg-[#C1E8FF]/30 focus:outline-none focus:ring-2 focus:ring-[#0090FF]/50"
+                aria-label="Open User Account Profile"
+              >
+                <Avatar className="h-8 w-8 border border-[#0090FF]/40 shadow-xs bg-[#052659]">
+                  <AvatarImage
+                    src={getAvatarUrl(user?.avatarFileId || user?.avatar)}
+                    alt={displayName}
+                  />
+                  <AvatarFallback className="bg-[#052659] text-white text-xs font-bold">
+                    {(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "U").toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden sm:flex flex-col text-left leading-none">
+                  <span className="text-xs font-bold text-[#021024] tracking-tight uppercase">
+                    {userIdentifier}
+                  </span>
+                  <span className="text-[10px] text-[#0090FF] font-bold tracking-wider uppercase mt-0.5">
+                    {user?.role}
+                  </span>
+                </div>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">View Account Profile</TooltipContent>
+          </Tooltip>
+
+          {/* Dedicated Direct Sign Out Button matching Image 1 door-exit icon */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                className="h-9 w-9 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                aria-label="Sign out"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Sign out</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
+      {/* Shared Desktop Profile Dialog (Opens exactly once) */}
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}

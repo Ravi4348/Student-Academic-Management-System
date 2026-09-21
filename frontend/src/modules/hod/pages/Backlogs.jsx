@@ -178,6 +178,16 @@ export const Backlogs = () => {
                       data={semesterDist}
                       margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                     >
+                      <defs>
+                        <linearGradient id="hodSemActiveGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0090FF" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#052659" stopOpacity={1} />
+                        </linearGradient>
+                        <linearGradient id="hodSemClearedGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#34d399" />
+                          <stop offset="100%" stopColor="#065f46" />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -202,7 +212,7 @@ export const Backlogs = () => {
                       <Bar
                         dataKey="active"
                         stackId="a"
-                        fill="#ef4444"
+                        fill="url(#hodSemActiveGrad)"
                         name="Active Backlogs"
                       >
                         <LabelList
@@ -217,9 +227,9 @@ export const Backlogs = () => {
                         <Bar
                           dataKey="cleared"
                           stackId="a"
-                          fill="#10b981"
+                          fill="url(#hodSemClearedGrad)"
                           name="Cleared Backlogs"
-                          radius={[4, 4, 0, 0]}
+                          radius={[6, 6, 0, 0]}
                         >
                           <LabelList
                             dataKey="cleared"
@@ -314,6 +324,12 @@ export const Backlogs = () => {
                     data={branchDist}
                     margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                   >
+                    <defs>
+                      <linearGradient id="hodBranchBacklogGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0090FF" />
+                        <stop offset="100%" stopColor="#052659" />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
@@ -336,8 +352,8 @@ export const Backlogs = () => {
                     />
                     <Bar
                       dataKey="count"
-                      fill="#3b82f6"
-                      radius={[4, 4, 0, 0]}
+                      fill="url(#hodBranchBacklogGrad)"
+                      radius={[6, 6, 0, 0]}
                       name="Active Backlogs"
                     >
                       <LabelList
@@ -378,6 +394,12 @@ export const Backlogs = () => {
                       layout="vertical"
                       margin={{ top: 20, right: 40, left: 10, bottom: 5 }}
                     >
+                      <defs>
+                        <linearGradient id="hodTopSubjGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#052659" />
+                          <stop offset="100%" stopColor="#0090FF" />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         horizontal={false}
@@ -404,8 +426,8 @@ export const Backlogs = () => {
                       />
                       <Bar
                         dataKey="count"
-                        fill="#ef4444"
-                        radius={[0, 4, 4, 0]}
+                        fill="url(#hodTopSubjGrad)"
+                        radius={[0, 6, 6, 0]}
                         name="Active Backlogs"
                         barSize={30}
                       >

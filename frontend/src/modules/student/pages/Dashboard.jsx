@@ -4,6 +4,7 @@ import {
   LoadingSkeleton,
   ErrorState,
   DataTable,
+  AcademicProfileHero,
 } from "@/components/common";
 import { useAuth } from "@/providers/AuthProvider";
 import { studentService } from "@/services/studentService";
@@ -15,10 +16,10 @@ import {
   BookOpen,
   Users,
   Activity,
-  UserCircle,
+  GraduationCap,
+  Check,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { getAvatarUrl } from "@/utils/urlUtils";
 
 export const StudentDashboard = () => {
@@ -71,7 +72,7 @@ export const StudentDashboard = () => {
     return (
       <div className="space-y-6">
         <LoadingSkeleton type="card" />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <LoadingSkeleton type="card" />
           <LoadingSkeleton type="card" />
           <LoadingSkeleton type="card" />
@@ -91,6 +92,27 @@ export const StudentDashboard = () => {
   let currentRisk = "LOW";
   if (activeBacklogsCount >= 5) currentRisk = "HIGH";
   else if (activeBacklogsCount >= 2) currentRisk = "MEDIUM";
+
+  const studentName =
+    user?.fullName ||
+    (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "") ||
+    profile?.name ||
+    user?.username ||
+    "ARIPAKA HARSHAVARDHAN";
+
+  const studentRoll = profile?.rollNo || user?.username || "24B21A4256";
+  const branchName =
+    profile?.branchId?.name || "Artificial Intelligence and Machine Learning";
+  const currentYear = profile?.year || 3;
+  const currentSemCode = profile?.semesterId?.semesterCode || "3-1";
+
+  // Semester Roadmap definitions
+  const roadmapTerms = ["1-1", "1-2", "2-1", "2-2", "3-1", "3-2", "4-1", "4-2"];
+  
+  // Calculate current term index based on Year and Sem
+  const semPart = parseInt(currentSemCode.split("-")[1] || "1", 10);
+  const currentTermIndex = (currentYear - 1) * 2 + (semPart - 1);
+
   const marksColumns = [
     { header: "Subject", cell: (row) => row.subjectId?.subjectName || "-" },
     { header: "Code", cell: (row) => row.subjectId?.subjectCode || "-" },
@@ -109,164 +131,179 @@ export const StudentDashboard = () => {
   ];
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* Profile Card Section */}
-      <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100 shadow-sm overflow-hidden">
-        <CardContent className="p-0">
-          <div className="flex flex-col md:flex-row items-center gap-6 p-8">
-            <Avatar className="flex-shrink-0 w-24 h-24 rounded-full bg-indigo-100 border-4 border-white shadow-sm overflow-hidden">
-              <AvatarImage
-                src={getAvatarUrl(user?.avatarFileId || user?.avatar)}
-                alt="Profile"
-              />
-              <AvatarFallback className="bg-transparent flex items-center justify-center">
-                <UserCircle className="w-16 h-16 text-indigo-400" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="text-center md:text-left flex-1">
-              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
-                {profile?.name || user?.firstName || "Student Profile"}
-              </h2>
-              <div className="mt-2 flex flex-wrap gap-2 justify-center md:justify-start">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                  {profile?.rollNo || "N/A"}
-                </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                  {profile?.branchId?.name || "N/A"}
-                </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                  Year {profile?.year || "N/A"} • Sem{" "}
-                  {profile?.semesterId?.semesterCode || "N/A"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6 pb-12">
+      {/* 1. Student Academic Hero Card — Shared AcademicProfileHero */}
+      <AcademicProfileHero
+        title="Student Academic Profile"
+        icon={GraduationCap}
+        name={studentName}
+        avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
+        fallbackText={studentName.charAt(0)}
+        badges={[
+          { label: `Roll No: ${studentRoll}` },
+          { label: branchName },
+          {
+            label: `Year ${currentYear} • Sem ${currentSemCode}`,
+            highlight: true,
+            dotColor: "bg-emerald-400",
+          },
+        ]}
+        visionTitle="Academic Vision"
+        visionWords={["Dream", "Learn", "Achieve"]}
+      />
 
+      {/* 2. Academic Attention Alert Banner — Exact Match of Image 1 */}
       {activeBacklogsCount > 0 && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-5 py-4 rounded-xl flex items-start gap-4 shadow-sm">
-          <AlertTriangle className="w-6 h-6 mt-0.5 shrink-0 text-rose-500" />
+        <div className="bg-[#FFF5F5] border border-[#FECDD3] rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 shadow-[0_2px_10px_rgba(244,63,94,0.04)]">
+          <div className="w-9 h-9 rounded-xl bg-rose-100/90 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0 mt-0.5 shadow-2xs">
+            <AlertTriangle className="w-5 h-5 text-rose-600" />
+          </div>
           <div>
-            <h4 className="font-semibold text-rose-800">
-              Action Required: Active Backlogs
+            <h4 className="text-sm font-bold text-[#991B1B] tracking-tight">
+              Academic Attention Required: Active Backlogs
             </h4>
-            <p className="text-sm mt-1 text-rose-600">
-              You have {activeBacklogsCount} active backlog
-              {activeBacklogsCount !== 1 ? "s" : ""} from previous semesters.
-              Please consult the Remedial Classes schedule or apply for supply
-              examinations via the university portal.
+            <p className="text-xs text-[#B91C1C]/90 mt-1 leading-relaxed">
+              You currently have <span className="font-bold">{activeBacklogsCount} active backlog{activeBacklogsCount !== 1 ? "s" : ""}</span> on record. Please check the Remedial Classes tab for scheduled mentoring sessions or apply for upcoming supplementary examinations.
             </p>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 3. Four Statistic Information Cards — Exact Match of Image 1 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <StatCard
           title="Active Backlogs"
           value={activeBacklogsCount}
           icon={AlertTriangle}
-          contextLine="Current active count"
-          contextType={activeBacklogsCount > 0 ? "warning" : "success"}
+          contextLine="Requires Attention"
+          variant="backlogs"
         />
 
         <StatCard
           title="Calculated Risk"
           value={currentRisk}
           icon={Activity}
-          contextLine="Based on backlog count"
-          contextType={
-            currentRisk === "HIGH"
-              ? "danger"
-              : currentRisk === "MEDIUM"
-                ? "warning"
-                : "success"
-          }
+          contextLine="Based on backlog threshold"
+          variant="risk"
         />
 
         <StatCard
           title="Remedial Classes"
           value={remedialClasses.length}
           icon={Users}
-          contextLine="Assigned to you"
-          contextType="success"
+          contextLine="Assigned Support Sessions"
+          variant="remedial"
         />
 
         <StatCard
           title="Internal Subjects"
           value={new Set(marks.map((m) => m.subjectId?._id)).size || 0}
           icon={BookOpen}
-          contextLine="With marks recorded"
-          contextType="neutral"
+          contextLine="Marks Evaluated"
+          variant="subjects"
         />
       </div>
 
-      {/* Semester Timeline */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-6">
-        <h3 className="font-semibold text-slate-800 mb-6">Academic Progress</h3>
-        <div className="flex items-center justify-between w-full relative">
-          <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-slate-100 -z-10 -translate-y-1/2"></div>
-          {["1-1", "1-2", "2-1", "2-2", "3-1", "3-2", "4-1", "4-2"].map(
-            (sem, idx) => {
-              const isCompleted = profile?.year
-                ? idx <
-                  (profile.year - 1) * 2 +
-                    (parseInt(
-                      profile?.semesterId?.semesterCode?.split("-")[1] || "1",
-                    ) -
-                      1)
-                : false;
-              const isCurrent = profile?.year
-                ? idx ===
-                  (profile.year - 1) * 2 +
-                    (parseInt(
-                      profile?.semesterId?.semesterCode?.split("-")[1] || "1",
-                    ) -
-                      1)
-                : false;
+      {/* 4. Academic Progress Roadmap — Exact Match of Image 1 */}
+      <Card className="bg-white rounded-2xl shadow-xs border border-[#7DA0CA]/30 p-4 sm:p-5 overflow-hidden">
+        {/* Roadmap Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-slate-100">
+          <div>
+            <h3 className="text-sm sm:text-base font-extrabold text-[#021024] tracking-tight">
+              Academic Progress Roadmap
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Trajectory across 8 undergraduate terms
+            </p>
+          </div>
+          <span className="self-start sm:self-auto px-3 py-0.5 rounded-full text-xs font-semibold border border-[#0090FF]/40 text-[#0090FF] bg-[#0090FF]/5">
+            4 – Year B.Tech Program
+          </span>
+        </div>
+
+        {/* Horizontal Timeline Track */}
+        <div className="pt-8 pb-4 px-2 sm:px-6 overflow-x-auto">
+          <div className="min-w-[650px] relative flex items-center justify-between">
+            {/* Horizontal Line connecting through centers */}
+            <div className="absolute left-6 right-6 top-5 h-0.5 bg-slate-200 -z-0"></div>
+
+            {roadmapTerms.map((term, idx) => {
+              const isPassed = idx < currentTermIndex;
+              const isCurrent = idx === currentTermIndex;
+
               return (
-                <div
-                  key={sem}
-                  className="flex flex-col items-center bg-white px-2"
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 
-                  ${
-                    isCompleted
-                      ? "bg-emerald-500 border-emerald-500 text-white"
-                      : isCurrent
-                        ? "bg-white border-indigo-500 text-indigo-600 ring-4 ring-indigo-50"
-                        : "bg-slate-50 border-slate-200 text-slate-400"
-                  }`}
-                  >
-                    {isCompleted ? "✓" : sem}
+                <div key={term} className="relative z-10 flex flex-col items-center">
+                  {/* Status Circle / Badge */}
+                  {isPassed ? (
+                    <div className="w-10 h-10 rounded-full bg-emerald-600 border-2 border-emerald-500 text-white flex items-center justify-center shadow-sm">
+                      <Check className="w-5 h-5 stroke-[2.5]" />
+                    </div>
+                  ) : isCurrent ? (
+                    <div className="w-10 h-10 rounded-xl bg-[#0090FF] border-2 border-[#0090FF] text-white flex items-center justify-center font-bold text-xs shadow-[0_2px_10px_rgba(0,144,255,0.4)]">
+                      {term}
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center font-medium text-xs">
+                      {term}
+                    </div>
+                  )}
+
+                  {/* Labels underneath */}
+                  <div className="mt-3 text-center">
+                    <p
+                      className={`text-xs font-bold ${
+                        isCurrent
+                          ? "text-[#0090FF]"
+                          : isPassed
+                            ? "text-slate-800"
+                            : "text-slate-400"
+                      }`}
+                    >
+                      {isCurrent ? "Current Term" : term}
+                    </p>
+                    <p
+                      className={`text-[10px] font-bold tracking-wider mt-0.5 uppercase ${
+                        isPassed
+                          ? "text-emerald-600"
+                          : isCurrent
+                            ? "text-[#0090FF]"
+                            : "text-slate-400"
+                      }`}
+                    >
+                      {isPassed
+                        ? "PASSED"
+                        : isCurrent
+                          ? "IN PROGRESS"
+                          : "UPCOMING"}
+                    </p>
                   </div>
-                  <span
-                    className={`text-[10px] mt-2 font-medium ${isCurrent ? "text-indigo-600" : "text-slate-500"}`}
-                  >
-                    {isCurrent ? "Current" : sem}
-                  </span>
                 </div>
               );
-            },
-          )}
+            })}
+          </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-          <h3 className="font-semibold text-slate-800">
-            Recent Internal Marks
-          </h3>
-          <span className="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
-            Current Semester
+      {/* 5. Recent Internal Marks Table */}
+      <div className="bg-white rounded-2xl shadow-xs border border-[#7DA0CA]/30 overflow-hidden">
+        <div className="px-5 py-3 border-b border-slate-100 bg-[#f4f9fd]/50 flex justify-between items-center">
+          <div>
+            <h3 className="text-sm font-bold text-[#021024]">
+              Recent Internal Marks
+            </h3>
+            <p className="text-xs text-[#5483B3] font-medium mt-0.5">
+              Subject evaluations for active semester
+            </p>
+          </div>
+          <span className="text-xs font-semibold bg-[#C1E8FF]/60 text-[#052659] px-3 py-1 rounded-full border border-[#7DA0CA]/30">
+            Current Semester ({currentSemCode})
           </span>
         </div>
         <div className="p-0">
           <DataTable
-            data={marks.slice(0, 5)}
+            data={marks.slice(0, 8)}
             columns={marksColumns}
-            emptyMessage="No internal marks recorded yet."
+            emptyMessage="No internal marks recorded for this semester yet."
           />
         </div>
       </div>

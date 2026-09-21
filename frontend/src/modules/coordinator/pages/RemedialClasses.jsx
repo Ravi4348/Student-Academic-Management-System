@@ -11,6 +11,23 @@ import { Plus, CheckSquare, CheckCircle, Trash2, X, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { apiClient } from "@/services/apiClient";
 import { AttendanceModal } from "../components/AttendanceModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const RemedialClasses = () => {
   const [classes, setClasses] = useState([]);
@@ -29,11 +46,13 @@ export const RemedialClasses = () => {
     customSubjectName: "",
     topic: "",
     facultyName: "",
+    targetBranch: "",
     targetYear: "",
     targetSemester: "",
     targetSection: "",
   });
 
+  const [branches, setBranches] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [eligibleStudents, setEligibleStudents] = useState([]);
   const [loadingEligible, setLoadingEligible] = useState(false);
@@ -42,12 +61,16 @@ export const RemedialClasses = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await remedialService.getAllRemedialClasses();
-      setClasses(data);
       const getBase = () =>
         apiClient.defaults.baseURL?.replace("/v1", "") || "/api";
-      const subRes = await apiClient.get(`${getBase()}/subjects`);
+      const [data, subRes, branchRes] = await Promise.all([
+        remedialService.getAllRemedialClasses(),
+        apiClient.get(`${getBase()}/subjects`),
+        apiClient.get(`${getBase()}/branches`),
+      ]);
+      setClasses(data);
       setSubjects(subRes.data || []);
+      setBranches(branchRes.data || []);
     } catch (err) {
       setError(err.message || "Failed to load remedial classes");
     } finally {
@@ -71,6 +94,7 @@ export const RemedialClasses = () => {
         targetYear: formData.targetYear
           ? Number(formData.targetYear)
           : undefined,
+        targetBranch: formData.targetBranch || undefined,
         targetSection: formData.targetSection || undefined,
       });
       setEligibleStudents(students);
@@ -83,7 +107,7 @@ export const RemedialClasses = () => {
 
   useEffect(() => {
     fetchEligibleStudents();
-  }, [formData.subjectId, formData.targetYear, formData.targetSection]);
+  }, [formData.subjectId, formData.targetYear, formData.targetBranch, formData.targetSection]);
 
   const StatusBadge = ({ status }) => {
     let color = "bg-slate-100 text-slate-800";
@@ -112,6 +136,7 @@ export const RemedialClasses = () => {
       customSubjectName: "",
       topic: "",
       facultyName: "",
+      targetBranch: "",
       targetYear: "",
       targetSemester: "",
       targetSection: "",
@@ -138,6 +163,7 @@ export const RemedialClasses = () => {
         ...formData,
         subjectId: formData.subjectId || undefined,
         customSubjectName: formData.customSubjectName || undefined,
+        targetBranch: formData.targetBranch || undefined,
         targetYear: formData.targetYear
           ? Number(formData.targetYear)
           : undefined,
@@ -178,6 +204,7 @@ export const RemedialClasses = () => {
         customSubjectName: row.customSubjectName,
         topic: row.topic,
         facultyName: row.facultyName,
+        targetBranch: row.targetBranch?._id || row.targetBranch,
         targetYear: row.targetYear,
         targetSemester: row.targetSemester,
         targetSection: row.targetSection?._id || row.targetSection,
@@ -203,6 +230,7 @@ export const RemedialClasses = () => {
       customSubjectName: row.customSubjectName || "",
       topic: row.topic || "",
       facultyName: row.facultyName || "",
+      targetBranch: row.targetBranch?._id || row.targetBranch || "",
       targetYear: row.targetYear?.toString() || "",
       targetSemester: row.targetSemester?.toString() || "",
       targetSection: row.targetSection?.toString() || "",
@@ -357,299 +385,341 @@ export const RemedialClasses = () => {
         }}
       />
 
-      {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col my-8">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-white shrink-0">
-              <h2 className="text-xl font-bold">Schedule Remedial Session</h2>
-              <button
-                onClick={() => setIsDialogOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-4xl bg-white p-0 gap-0 overflow-hidden rounded-xl border border-[#7DA0CA]/40 shadow-xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="px-6 py-4 border-b border-[#7DA0CA]/25 bg-[#052659] text-white flex flex-row items-center justify-between shrink-0">
+            <DialogTitle className="text-base font-bold text-white">
+              Schedule Remedial Session
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDialogOpen(false)}
+              className="h-8 w-8 text-white/80 hover:bg-white/10 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </DialogHeader>
+
+          <div className="p-6 flex-1 overflow-y-auto bg-[#f4f9fd]/30">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form
+                onSubmit={handleCreate}
+                className="space-y-4 flex flex-col h-full bg-white p-5 rounded-xl border border-[#7DA0CA]/30 shadow-xs"
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 flex-1 overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <form
-                  onSubmit={handleCreate}
-                  className="space-y-4 flex flex-col h-full"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium mb-1">
-                        Subject
-                      </label>
-                      <select
-                        className="w-full p-2 border rounded"
-                        value={formData.subjectId}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            subjectId: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">
-                          -- Select Subject (Triggers Backlog Search) --
-                        </option>
-                        {subjects.map((s) => (
-                          <option key={s._id} value={s._id}>
-                            {s.subjectName} ({s.subjectCode})
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Select a subject to automatically find ACTIVE backlog
-                        students.
-                      </p>
-                    </div>
-
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium mb-1">
-                        Topic
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="w-full p-2 border rounded"
-                        value={formData.topic}
-                        onChange={(e) =>
-                          setFormData({ ...formData, topic: e.target.value })
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Date
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        className="w-full p-2 border rounded"
-                        value={formData.date}
-                        onChange={(e) =>
-                          setFormData({ ...formData, date: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Venue
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="w-full p-2 border rounded"
-                        value={formData.venue}
-                        onChange={(e) =>
-                          setFormData({ ...formData, venue: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Start Time
-                      </label>
-                      <input
-                        type="time"
-                        required
-                        className="w-full p-2 border rounded"
-                        value={formData.startTime}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            startTime: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        End Time
-                      </label>
-                      <input
-                        type="time"
-                        required
-                        className="w-full p-2 border rounded"
-                        value={formData.endTime}
-                        onChange={(e) =>
-                          setFormData({ ...formData, endTime: e.target.value })
-                        }
-                      />
-                    </div>
-
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium mb-1">
-                        Faculty Name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="w-full p-2 border rounded"
-                        value={formData.facultyName}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            facultyName: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className="col-span-2 pt-2 pb-1 border-b">
-                      <h3 className="font-semibold text-sm">
-                        Narrow Target Population (Optional)
-                      </h3>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Narrow by Year
-                      </label>
-                      <select
-                        className="w-full p-2 border rounded"
-                        value={formData.targetYear}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            targetYear: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">All Years</option>
-                        <option value="1">Year 1</option>
-                        <option value="2">Year 2</option>
-                        <option value="3">Year 3</option>
-                        <option value="4">Year 4</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Narrow by Section ID
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full p-2 border rounded"
-                        value={formData.targetSection}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            targetSection: e.target.value,
-                          })
-                        }
-                        placeholder="Optional"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Target Semester (Metadata)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="2"
-                        className="w-full p-2 border rounded"
-                        value={formData.targetSemester}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            targetSemester: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t mt-6">
-                    <button
-                      type="submit"
-                      className="w-full px-4 py-2 bg-primary text-white rounded-md text-sm font-medium"
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Subject
+                    </Label>
+                    <select
+                      className="w-full h-10 px-3 text-xs bg-white border border-[#7DA0CA]/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#052659]"
+                      value={formData.subjectId}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          subjectId: e.target.value,
+                        })
+                      }
                     >
-                      Schedule Session
-                    </button>
+                      <option value="">
+                        -- Select Subject (Triggers Backlog Search) --
+                      </option>
+                      {subjects.map((s) => (
+                        <option key={s._id} value={s._id}>
+                          {s.subjectName} ({s.subjectCode})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-[#5483B3]">
+                      Select a subject to automatically find ACTIVE backlog students.
+                    </p>
                   </div>
-                </form>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex flex-col h-full max-h-[600px]">
-                  <h3 className="font-semibold text-slate-800 mb-2">
-                    Eligible Roster Preview
-                  </h3>
-                  <div className="text-sm text-slate-600 mb-4 pb-4 border-b">
-                    Automatically matches students with an ACTIVE backlog in the
-                    selected subject.
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Topic
+                    </Label>
+                    <Input
+                      type="text"
+                      required
+                      placeholder="e.g. Unit 3 Problem Solving"
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.topic}
+                      onChange={(e) =>
+                        setFormData({ ...formData, topic: e.target.value })
+                      }
+                    />
                   </div>
 
-                  {loadingEligible ? (
-                    <div className="flex-1 flex items-center justify-center text-sm text-slate-500">
-                      Loading roster...
-                    </div>
-                  ) : !formData.subjectId ? (
-                    <div className="flex-1 flex items-center justify-center text-sm text-slate-500">
-                      Select a subject to view eligible students.
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-sm font-medium">
-                          Target Count:{" "}
-                          <span className="text-primary">
-                            {finalEligibleList.length}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="flex-1 overflow-auto border rounded bg-white">
-                        <table className="w-full text-left text-sm">
-                          <thead className="bg-slate-100 sticky top-0">
-                            <tr>
-                              <th className="p-2 font-medium">HTNO / Name</th>
-                              <th className="p-2 font-medium">Branch</th>
-                              <th className="p-2 font-medium">Year</th>
-                              <th className="p-2 font-medium text-center">
-                                Backlog Count
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {finalEligibleList.map((s) => (
-                              <tr
-                                key={s._id}
-                                className="border-b last:border-0 hover:bg-slate-50"
-                              >
-                                <td className="p-2">
-                                  <div className="font-medium">{s.rollNo}</div>
-                                  <div className="text-xs text-slate-500">
-                                    {s.name}
-                                  </div>
-                                </td>
-                                <td className="p-2">{s.branchId?.code}</td>
-                                <td className="p-2">Y{s.year}</td>
-                                <td className="p-2 text-center font-medium text-rose-600 bg-rose-50/50">
-                                  {s.activeBacklogCount || 1}
-                                </td>
-                              </tr>
-                            ))}
-                            {finalEligibleList.length === 0 && (
-                              <tr>
-                                <td
-                                  colSpan={4}
-                                  className="p-4 text-center text-slate-500 italic"
-                                >
-                                  No eligible active backlog students found.
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
-                  )}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Date
+                    </Label>
+                    <Input
+                      type="date"
+                      required
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.date}
+                      onChange={(e) =>
+                        setFormData({ ...formData, date: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Venue
+                    </Label>
+                    <Input
+                      type="text"
+                      required
+                      placeholder="e.g. Hall A-204"
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.venue}
+                      onChange={(e) =>
+                        setFormData({ ...formData, venue: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Start Time
+                    </Label>
+                    <Input
+                      type="time"
+                      required
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.startTime}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          startTime: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      End Time
+                    </Label>
+                    <Input
+                      type="time"
+                      required
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.endTime}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          endTime: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Faculty In-charge
+                    </Label>
+                    <Input
+                      type="text"
+                      placeholder="Assigned Faculty Name"
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.facultyName}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          facultyName: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-1.5 pt-2">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Target Branch
+                    </Label>
+                    <select
+                      className="w-full h-10 px-3 text-xs bg-white border border-[#7DA0CA]/40 rounded-lg focus:outline-none"
+                      value={formData.targetBranch}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          targetBranch: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">All Branches</option>
+                      {branches.map((b) => (
+                        <option key={b._id} value={b._id}>
+                          {b.name} ({b.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Target Year
+                    </Label>
+                    <select
+                      className="w-full h-10 px-3 text-xs bg-white border border-[#7DA0CA]/40 rounded-lg focus:outline-none"
+                      value={formData.targetYear}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          targetYear: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">All Years</option>
+                      <option value="1">Year 1</option>
+                      <option value="2">Year 2</option>
+                      <option value="3">Year 3</option>
+                      <option value="4">Year 4</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Target Section
+                    </Label>
+                    <Input
+                      type="text"
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.targetSection}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          targetSection: e.target.value,
+                        })
+                      }
+                      placeholder="Optional"
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-xs font-bold text-[#021024]">
+                      Target Semester
+                    </Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="2"
+                      className="h-10 text-xs bg-white border-[#7DA0CA]/40 rounded-lg"
+                      value={formData.targetSemester}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          targetSemester: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
                 </div>
+
+                <div className="pt-3 border-t border-[#7DA0CA]/20 mt-auto">
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#052659] hover:bg-[#021024] text-white text-xs font-semibold h-10 shadow-xs"
+                  >
+                    Schedule Session
+                  </Button>
+                </div>
+              </form>
+
+              <div className="bg-white border border-[#7DA0CA]/35 rounded-xl p-5 flex flex-col h-full max-h-[620px] shadow-xs">
+                <h3 className="font-bold text-sm text-[#021024] mb-1">
+                  Eligible Roster Preview
+                </h3>
+                <div className="text-xs text-[#5483B3] mb-3 pb-3 border-b border-[#7DA0CA]/20">
+                  Automatically matches students with an ACTIVE backlog in the
+                  selected subject.
+                </div>
+
+                {loadingEligible ? (
+                  <div className="flex-1 flex items-center justify-center text-xs text-[#5483B3] font-medium">
+                    Loading eligible roster...
+                  </div>
+                ) : !formData.subjectId ? (
+                  <div className="flex-1 flex items-center justify-center text-xs text-[#5483B3] font-medium text-center p-4">
+                    Select a subject to view eligible students.
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="text-xs font-semibold text-[#021024]">
+                        Target Count:{" "}
+                        <span className="text-[#052659] font-bold">
+                          {finalEligibleList.length}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex-1 overflow-auto border border-[#7DA0CA]/30 rounded-lg">
+                      <Table>
+                        <TableHeader className="bg-[#052659]/5 sticky top-0 z-10 border-b border-[#7DA0CA]/25">
+                          <TableRow>
+                            <TableHead className="text-[#052659] font-bold text-xs uppercase py-2.5">
+                              HTNO / Name
+                            </TableHead>
+                            <TableHead className="text-[#052659] font-bold text-xs uppercase py-2.5">
+                              Branch
+                            </TableHead>
+                            <TableHead className="text-[#052659] font-bold text-xs uppercase py-2.5">
+                              Year
+                            </TableHead>
+                            <TableHead className="text-[#052659] font-bold text-xs uppercase py-2.5 text-center">
+                              Backlogs
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {finalEligibleList.map((s) => (
+                            <TableRow
+                              key={s._id}
+                              className="border-b border-[#7DA0CA]/15 hover:bg-[#C1E8FF]/20"
+                            >
+                              <TableCell className="p-2.5">
+                                <div className="font-mono text-xs font-semibold text-[#021024]">
+                                  {s.rollNo}
+                                </div>
+                                <div className="text-[11px] text-[#5483B3]">
+                                  {s.name}
+                                </div>
+                              </TableCell>
+                              <TableCell className="p-2.5 text-xs font-medium text-[#021024]">
+                                {s.branchId?.code}
+                              </TableCell>
+                              <TableCell className="p-2.5 text-xs text-[#5483B3]">
+                                Y{s.year}
+                              </TableCell>
+                              <TableCell className="p-2.5 text-center font-bold text-rose-600 bg-rose-50/50 text-xs">
+                                {s.activeBacklogCount || 1}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          {finalEligibleList.length === 0 && (
+                            <TableRow>
+                              <TableCell
+                                colSpan={4}
+                                className="p-6 text-center text-xs text-slate-400 italic"
+                              >
+                                No eligible active backlog students found.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {attendanceSessionId && (
         <AttendanceModal

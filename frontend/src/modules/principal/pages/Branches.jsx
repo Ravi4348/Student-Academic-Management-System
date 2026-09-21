@@ -24,6 +24,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const CustomTooltip = ({ active, payload, metric }) => {
+  if (active && payload && payload.length) {
+    const val = payload[0].value;
+    const fullRow = payload[0].payload;
+    let displayVal = val;
+    if (val === "Not Available") displayVal = "Not Available";
+    else if (metric === "Pass %") displayVal = `${val}%`;
+
+    return (
+      <div className="bg-white p-3 border border-slate-200 shadow-sm rounded-lg">
+        <p className="font-medium text-slate-800 mb-1">{fullRow.name}</p>
+        <p className="text-sm" style={{ color: payload[0].fill }}>
+          {metric}: <span className="font-bold">{displayVal}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export const Branches = () => {
   const [data, setData] = useState([]);
   const [metric, setMetric] = useState("Students");
@@ -65,26 +85,6 @@ export const Branches = () => {
   useEffect(() => {
     loadData();
   }, []);
-
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const val = payload[0].value;
-      const fullRow = payload[0].payload;
-      let displayVal = val;
-      if (val === "Not Available") displayVal = "Not Available";
-      else if (metric === "Pass %") displayVal = `${val}%`;
-
-      return (
-        <div className="bg-white p-3 border border-slate-200 shadow-sm rounded-lg">
-          <p className="font-medium text-slate-800 mb-1">{fullRow.name}</p>
-          <p className="text-sm" style={{ color: payload[0].fill }}>
-            {metric}: <span className="font-bold">{displayVal}</span>
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   const isDataEmpty = () => {
     if (data.length === 0) return true;
@@ -200,11 +200,17 @@ export const Branches = () => {
                   : `No data available for ${metric}.`}
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={350}>
+              <ResponsiveContainer width="100%" height={280}>
                 <BarChart
                   data={data}
                   margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                 >
+                  <defs>
+                    <linearGradient id="branchMetricGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0090FF" />
+                      <stop offset="100%" stopColor="#052659" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
@@ -222,12 +228,12 @@ export const Branches = () => {
                     axisLine={false}
                     tickLine={false}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip metric={metric} />} />
                   <Legend />
                   <Bar
                     dataKey={metric}
-                    fill="#3b82f6"
-                    radius={[4, 4, 0, 0]}
+                    fill="url(#branchMetricGrad)"
+                    radius={[6, 6, 0, 0]}
                     name={metric}
                   />
                 </BarChart>

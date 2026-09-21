@@ -175,7 +175,7 @@ export const Notices = () => {
         new Blob([blob], { type: "application/pdf" }),
       );
       window.open(url, "_blank");
-    } catch (err) {
+    } catch {
       alert("Failed to open PDF document.");
     }
   };

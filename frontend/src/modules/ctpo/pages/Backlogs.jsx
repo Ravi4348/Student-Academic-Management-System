@@ -153,6 +153,12 @@ export const Backlogs = () => {
                 data={semesterData}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
+                <defs>
+                  <linearGradient id="ctpoSemBacklogGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0090FF" />
+                    <stop offset="100%" stopColor="#052659" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
@@ -179,8 +185,8 @@ export const Backlogs = () => {
                 />
                 <Bar
                   dataKey="count"
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
+                  fill="url(#ctpoSemBacklogGrad)"
+                  radius={[6, 6, 0, 0]}
                   maxBarSize={40}
                 />
               </BarChart>
@@ -194,6 +200,12 @@ export const Backlogs = () => {
                 layout="vertical"
                 margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
               >
+                <defs>
+                  <linearGradient id="ctpoSubjBacklogGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#052659" />
+                    <stop offset="100%" stopColor="#0090FF" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   horizontal={false}
@@ -223,8 +235,8 @@ export const Backlogs = () => {
                 />
                 <Bar
                   dataKey="count"
-                  fill="#8b5cf6"
-                  radius={[0, 4, 4, 0]}
+                  fill="url(#ctpoSubjBacklogGrad)"
+                  radius={[0, 6, 6, 0]}
                   maxBarSize={20}
                 />
               </BarChart>

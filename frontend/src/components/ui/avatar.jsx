@@ -49,7 +49,7 @@ const AvatarImage = React.forwardRef(({ className, src, ...props }, ref) => {
         const url = URL.createObjectURL(blob);
         setObjectUrl(url);
         setHasError(false);
-      } catch (error) {
+      } catch {
         if (mounted) {
           setHasError(true);
         }

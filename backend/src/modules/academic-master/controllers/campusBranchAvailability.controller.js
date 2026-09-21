@@ -40,3 +40,13 @@ exports.updateAvailability = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.deleteAvailability = async (req, res, next) => {
+  try {
+    const result = await CampusBranchAvailabilityService.deleteAvailability(req.params.id);
+    return sendSuccess(res, result);
+  } catch (error) {
+    if (error.message.includes('not found')) return sendError(res, error.message, 404);
+    next(error);
+  }
+};

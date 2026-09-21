@@ -6,7 +6,23 @@ import {
   DataTable,
 } from "@/components/common";
 import { apiClient } from "@/services/apiClient";
-import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Search, ChevronLeft, ChevronRight, History } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 export const AttendanceProgress = () => {
   const [students, setStudents] = useState([]);
@@ -248,116 +264,131 @@ export const AttendanceProgress = () => {
         </>
       )}
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-4 border-b shrink-0">
-              <h2 className="text-lg font-bold text-slate-800">
-                Progress History: {selectedStudent?.name} (
-                {selectedStudent?.rollNo})
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-slate-100 rounded-full text-slate-500"
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-4xl bg-white p-0 gap-0 overflow-hidden rounded-xl border border-[#7DA0CA]/40 shadow-xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="px-6 py-4 border-b border-[#7DA0CA]/25 bg-[#052659] text-white flex flex-row items-center justify-between shrink-0">
+            <DialogTitle className="text-base font-bold text-white flex items-center gap-2">
+              <History className="h-4 w-4 text-[#C1E8FF]" />
+              Progress History: {selectedStudent?.name} ({selectedStudent?.rollNo})
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsModalOpen(false)}
+              className="h-8 w-8 text-white/80 hover:bg-white/10 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </DialogHeader>
+
+          <div className="px-6 py-3 bg-[#f4f9fd] border-b border-[#7DA0CA]/30 flex flex-wrap gap-3 justify-between items-center shrink-0">
+            <div className="flex gap-1.5">
+              <Button
+                variant={filter === "All" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilter("All")}
+                className={`h-7 text-xs font-semibold ${
+                  filter === "All"
+                    ? "bg-[#052659] text-white"
+                    : "border-[#7DA0CA]/40 text-[#021024] bg-white hover:bg-[#C1E8FF]/30"
+                }`}
               >
-                <X className="w-5 h-5" />
-              </button>
+                All
+              </Button>
+              <Button
+                variant={filter === "RemedialClass" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilter("RemedialClass")}
+                className={`h-7 text-xs font-semibold ${
+                  filter === "RemedialClass"
+                    ? "bg-[#052659] text-white"
+                    : "border-[#7DA0CA]/40 text-[#021024] bg-white hover:bg-[#C1E8FF]/30"
+                }`}
+              >
+                Remedial
+              </Button>
+              <Button
+                variant={filter === "GuestLecture" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilter("GuestLecture")}
+                className={`h-7 text-xs font-semibold ${
+                  filter === "GuestLecture"
+                    ? "bg-[#052659] text-white"
+                    : "border-[#7DA0CA]/40 text-[#021024] bg-white hover:bg-[#C1E8FF]/30"
+                }`}
+              >
+                Guest Lectures
+              </Button>
             </div>
-
-            <div className="px-4 py-3 bg-slate-50 border-b flex justify-between items-center shrink-0">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setFilter("All")}
-                  className={`px-3 py-1 text-sm rounded ${filter === "All" ? "bg-primary text-white" : "bg-white border text-slate-600"}`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setFilter("RemedialClass")}
-                  className={`px-3 py-1 text-sm rounded ${filter === "RemedialClass" ? "bg-primary text-white" : "bg-white border text-slate-600"}`}
-                >
-                  Remedial
-                </button>
-                <button
-                  onClick={() => setFilter("GuestLecture")}
-                  className={`px-3 py-1 text-sm rounded ${filter === "GuestLecture" ? "bg-primary text-white" : "bg-white border text-slate-600"}`}
-                >
-                  Guest Lectures
-                </button>
-              </div>
-              <div className="flex gap-4 text-sm font-medium">
-                <div className="text-slate-700">Total: {histTotal}</div>
-                <div className="text-emerald-600">Present: {histPresent}</div>
-                <div className="text-rose-600">Absent: {histAbsent}</div>
-                <div className="text-indigo-600">Attendance: {histPct}%</div>
-              </div>
-            </div>
-
-            <div className="p-4 flex-1 overflow-y-auto">
-              {isHistoryLoading ? (
-                <div className="py-8 text-center text-slate-500">
-                  Loading records...
-                </div>
-              ) : filteredHistory.length === 0 ? (
-                <div className="py-8 text-center text-slate-500 italic">
-                  No progress records found for this filter.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-600 border-b sticky top-0">
-                        <th className="p-3 font-semibold">Type</th>
-                        <th className="p-3 font-semibold">Subject</th>
-                        <th className="p-3 font-semibold">Topic</th>
-                        <th className="p-3 font-semibold">Date</th>
-                        <th className="p-3 font-semibold">Time</th>
-                        <th className="p-3 font-semibold">Venue</th>
-                        <th className="p-3 font-semibold">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredHistory.map((record, i) => (
-                        <tr
-                          key={i}
-                          className="border-b last:border-0 hover:bg-slate-50"
-                        >
-                          <td className="p-3">
-                            {record.type === "RemedialClass"
-                              ? "Remedial"
-                              : "Guest Lecture"}
-                          </td>
-                          <td className="p-3">{record.subject}</td>
-                          <td className="p-3">{record.topic}</td>
-                          <td className="p-3">
-                            {new Date(record.date).toLocaleDateString()}
-                          </td>
-                          <td className="p-3">
-                            {formatTimeAMPM(record.startTime)} -{" "}
-                            {formatTimeAMPM(record.endTime)}
-                          </td>
-                          <td className="p-3">{record.venue}</td>
-                          <td className="p-3">
-                            {record.present ? (
-                              <span className="text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">
-                                Present
-                              </span>
-                            ) : (
-                              <span className="text-rose-600 font-medium bg-rose-50 px-2 py-0.5 rounded-full">
-                                Absent
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+            <div className="flex items-center gap-4 text-xs font-medium text-[#021024]">
+              <div>Total: <span className="font-bold text-[#052659]">{histTotal}</span></div>
+              <div>Present: <span className="font-bold text-emerald-600">{histPresent}</span></div>
+              <div>Absent: <span className="font-bold text-rose-600">{histAbsent}</span></div>
+              <div>Attendance: <span className="font-bold text-[#5483B3]">{histPct}%</span></div>
             </div>
           </div>
-        </div>
-      )}
+
+          <div className="p-6 flex-1 overflow-y-auto bg-[#f4f9fd]/30">
+            {isHistoryLoading ? (
+              <div className="py-12 text-center text-xs text-[#5483B3] font-medium">
+                Loading attendance history...
+              </div>
+            ) : filteredHistory.length === 0 ? (
+              <div className="py-12 text-center text-xs text-slate-500 bg-white border border-[#7DA0CA]/30 rounded-xl italic">
+                No progress records found for this filter.
+              </div>
+            ) : (
+              <div className="bg-white border border-[#7DA0CA]/35 rounded-xl shadow-xs overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-[#052659]/5 border-b border-[#7DA0CA]/25">
+                    <TableRow>
+                      <TableHead className="text-[#052659] font-bold text-xs uppercase py-3">Type</TableHead>
+                      <TableHead className="text-[#052659] font-bold text-xs uppercase py-3">Subject</TableHead>
+                      <TableHead className="text-[#052659] font-bold text-xs uppercase py-3">Topic</TableHead>
+                      <TableHead className="text-[#052659] font-bold text-xs uppercase py-3">Date</TableHead>
+                      <TableHead className="text-[#052659] font-bold text-xs uppercase py-3">Time</TableHead>
+                      <TableHead className="text-[#052659] font-bold text-xs uppercase py-3">Venue</TableHead>
+                      <TableHead className="text-[#052659] font-bold text-xs uppercase py-3 text-center">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredHistory.map((record, i) => (
+                      <TableRow
+                        key={i}
+                        className="border-b border-[#7DA0CA]/15 hover:bg-[#C1E8FF]/20"
+                      >
+                        <TableCell className="text-xs font-semibold text-[#021024]">
+                          {record.type === "RemedialClass" ? "Remedial" : "Guest Lecture"}
+                        </TableCell>
+                        <TableCell className="text-xs font-medium text-[#021024]">{record.subject}</TableCell>
+                        <TableCell className="text-xs text-[#5483B3]">{record.topic}</TableCell>
+                        <TableCell className="text-xs text-[#021024]">
+                          {new Date(record.date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-xs text-[#5483B3] whitespace-nowrap">
+                          {formatTimeAMPM(record.startTime)} - {formatTimeAMPM(record.endTime)}
+                        </TableCell>
+                        <TableCell className="text-xs text-[#021024]">{record.venue}</TableCell>
+                        <TableCell className="text-center py-2">
+                          {record.present ? (
+                            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
+                              Present
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700 text-[10px] font-semibold">
+                              Absent
+                            </Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

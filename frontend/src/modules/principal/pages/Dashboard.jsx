@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
-  PageHeader,
   LoadingSkeleton,
   ErrorState,
   ChartCard,
   StatCard,
+  AcademicProfileHero,
 } from "@/components/common";
+import { useAuth } from "@/providers/AuthProvider";
+import { getAvatarUrl } from "@/utils/urlUtils";
 import { analyticsService } from "@/services/analyticsService";
 import { Users, AlertTriangle, AlertCircle } from "lucide-react";
 import {
@@ -24,6 +26,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,9 +44,14 @@ export const Dashboard = () => {
         analyticsService.getAcademicTrends(),
       ]);
 
-      const lowRisk = risk.find((r) => r.level === "LOW")?.count || 0;
-      const mediumRisk = risk.find((r) => r.level === "MEDIUM")?.count || 0;
-      const highRisk = risk.find((r) => r.level === "HIGH")?.count || 0;
+      const riskList = Array.isArray(risk)
+        ? risk
+        : Array.isArray(risk?.distribution)
+          ? risk.distribution
+          : [];
+      const lowRisk = riskList.find((r) => r.level === "LOW")?.count || 0;
+      const mediumRisk = riskList.find((r) => r.level === "MEDIUM")?.count || 0;
+      const highRisk = riskList.find((r) => r.level === "HIGH")?.count || 0;
       const atRisk = mediumRisk + highRisk;
 
       const riskData = [
@@ -54,18 +62,18 @@ export const Dashboard = () => {
 
       // Reformat backlog branch dist
       const backlogBranches =
-        backlogs.branchDist?.map((b) => ({ name: b._id, value: b.count })) ||
+        backlogs?.branchDist?.map((b) => ({ name: b._id, value: b.count })) ||
         [];
 
       // Reformat student branch dist (this data comes from kpis.studentBranches)
       const studentBranches =
-        kpis.studentBranches?.map((b) => ({
+        kpis?.studentBranches?.map((b) => ({
           name: b.branchCode,
           value: b.count,
         })) || [];
       // Reformat student year dist
       const yearsMap = { 2: 0, 3: 0, 4: 0 };
-      kpis.studentYears?.forEach((y) => {
+      kpis?.studentYears?.forEach((y) => {
         if (yearsMap[y.year] !== undefined) yearsMap[y.year] = y.count;
       });
       const studentYears = [
@@ -75,10 +83,10 @@ export const Dashboard = () => {
       ];
 
       setData({
-        totalStudents: kpis.totalStudents,
-        activeUsers: kpis.activeUsers,
-        activeBacklogSubjects: backlogs.activeBacklogSubjects,
-        studentsWithActiveBacklogs: backlogs.studentsWithActiveBacklogs,
+        totalStudents: kpis?.totalStudents || 0,
+        activeUsers: kpis?.activeUsers || 0,
+        activeBacklogSubjects: backlogs?.activeBacklogSubjects || 0,
+        studentsWithActiveBacklogs: backlogs?.studentsWithActiveBacklogs || 0,
         atRisk,
         riskData,
         backlogBranches,
@@ -98,9 +106,24 @@ export const Dashboard = () => {
 
   return (
     <>
-      <PageHeader
-        title="Institution Dashboard"
-        description="High-level institution-wide academic and performance summary."
+      {/* 1. Principal Academic Profile Hero Banner */}
+      <AcademicProfileHero
+        title="Principal Academic Profile"
+        icon={Users}
+        name={
+          user?.firstName
+            ? `${user.firstName} ${user.lastName || ""}`.trim()
+            : user?.username || "Principal & Executive Director"
+        }
+        avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
+        fallbackText={(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "P").toUpperCase()}
+        badges={[
+          { label: "Institution Executive Leadership" },
+          { label: `Campus Strength: ${data?.totalStudents || 0} Students` },
+          { label: "Academic Session 2025–2026", highlight: true, dotColor: "bg-emerald-400" },
+        ]}
+        visionTitle="Institutional Vision"
+        visionWords={["Govern", "Elevate", "Achieve"]}
       />
 
       {isLoading ? (
@@ -158,7 +181,7 @@ export const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Students by Branch */}
+            {/* Students by Branch — Gradient Bar Presentation */}
             <div
               onClick={() => navigate("/principal/branches")}
               className="cursor-pointer transition-transform hover:-translate-y-1"
@@ -172,11 +195,18 @@ export const Dashboard = () => {
                     No student data available
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={260}>
                     <BarChart
                       data={data.studentBranches}
-                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                      margin={{ top: 20, right: 25, left: -10, bottom: 20 }}
                     >
+                      <defs>
+                        <linearGradient id="branchGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0090FF" stopOpacity={0.95} />
+                          <stop offset="60%" stopColor="#0A3670" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#052659" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -184,27 +214,29 @@ export const Dashboard = () => {
                       />
                       <XAxis
                         dataKey="name"
-                        tick={{ fill: "#64748b" }}
+                        tick={{ fill: "#64748b", fontSize: 11.5 }}
+                        interval={0}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fill: "#64748b" }}
+                        tick={{ fill: "#64748b", fontSize: 11.5 }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <Tooltip
                         cursor={{ fill: "#f8fafc" }}
                         contentStyle={{
-                          borderRadius: "8px",
-                          border: "none",
-                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                          borderRadius: "12px",
+                          border: "1px solid #7DA0CA40",
+                          boxShadow: "0 6px 16px -2px rgb(0 0 0 / 0.08)",
+                          backgroundColor: "#ffffff",
                         }}
                       />
                       <Bar
                         dataKey="value"
-                        fill="#3b82f6"
-                        radius={[4, 4, 0, 0]}
+                        fill="url(#branchGradient)"
+                        radius={[6, 6, 0, 0]}
                         name="Students"
                       />
                     </BarChart>
@@ -213,7 +245,7 @@ export const Dashboard = () => {
               </ChartCard>
             </div>
 
-            {/* Students by Year */}
+            {/* Students by Year — Vertical Bar Chart */}
             <div
               onClick={() => navigate("/principal/years")}
               className="cursor-pointer transition-transform hover:-translate-y-1"
@@ -227,11 +259,17 @@ export const Dashboard = () => {
                     No student data available
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={260}>
                     <BarChart
                       data={data.studentYears}
-                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                      margin={{ top: 20, right: 25, left: -10, bottom: 20 }}
                     >
+                      <defs>
+                        <linearGradient id="yearGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#5483B3" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#052659" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -239,27 +277,29 @@ export const Dashboard = () => {
                       />
                       <XAxis
                         dataKey="name"
-                        tick={{ fill: "#64748b" }}
+                        tick={{ fill: "#64748b", fontSize: 11.5 }}
+                        interval={0}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fill: "#64748b" }}
+                        tick={{ fill: "#64748b", fontSize: 11.5 }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <Tooltip
                         cursor={{ fill: "#f8fafc" }}
                         contentStyle={{
-                          borderRadius: "8px",
-                          border: "none",
-                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                          borderRadius: "12px",
+                          border: "1px solid #7DA0CA40",
+                          boxShadow: "0 6px 16px -2px rgb(0 0 0 / 0.08)",
+                          backgroundColor: "#ffffff",
                         }}
                       />
                       <Bar
                         dataKey="value"
-                        fill="#6366f1"
-                        radius={[4, 4, 0, 0]}
+                        fill="url(#yearGradient)"
+                        radius={[6, 6, 0, 0]}
                         name="Students"
                       />
                     </BarChart>
@@ -270,7 +310,7 @@ export const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Active Backlogs by Branch */}
+            {/* Active Backlogs by Branch — Horizontal Bar Chart Presentation */}
             <div
               onClick={() => navigate("/principal/backlogs")}
               className="cursor-pointer transition-transform hover:-translate-y-1"
@@ -284,39 +324,50 @@ export const Dashboard = () => {
                     No backlog data available
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={260}>
                     <BarChart
+                      layout="vertical"
                       data={data.backlogBranches}
-                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                      margin={{ top: 15, right: 30, left: 10, bottom: 5 }}
                     >
+                      <defs>
+                        <linearGradient id="backlogGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#052659" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#5483B3" stopOpacity={0.9} />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        vertical={false}
+                        horizontal={false}
                         stroke="#e2e8f0"
                       />
                       <XAxis
-                        dataKey="name"
-                        tick={{ fill: "#64748b" }}
+                        type="number"
+                        tick={{ fill: "#64748b", fontSize: 11.5 }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fill: "#64748b" }}
+                        dataKey="name"
+                        type="category"
+                        width={80}
+                        tick={{ fill: "#64748b", fontSize: 11.5 }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <Tooltip
                         cursor={{ fill: "#f8fafc" }}
                         contentStyle={{
-                          borderRadius: "8px",
-                          border: "none",
-                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                          borderRadius: "12px",
+                          border: "1px solid #7DA0CA40",
+                          boxShadow: "0 6px 16px -2px rgb(0 0 0 / 0.08)",
+                          backgroundColor: "#ffffff",
                         }}
                       />
                       <Bar
                         dataKey="value"
-                        fill="#f43f5e"
-                        radius={[4, 4, 0, 0]}
+                        fill="url(#backlogGradient)"
+                        radius={[0, 6, 6, 0]}
                         name="Backlogs"
                       />
                     </BarChart>
@@ -325,7 +376,7 @@ export const Dashboard = () => {
               </ChartCard>
             </div>
 
-            {/* Risk Distribution */}
+            {/* Risk Distribution — Approved Doughnut Distribution */}
             <div
               onClick={() => navigate("/principal/risk")}
               className="cursor-pointer transition-transform hover:-translate-y-1"
@@ -339,15 +390,15 @@ export const Dashboard = () => {
                     No risk data available
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={260}>
                     <PieChart>
                       <Pie
                         data={data.riskData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={80}
-                        outerRadius={110}
-                        paddingAngle={5}
+                        innerRadius={65}
+                        outerRadius={95}
+                        paddingAngle={4}
                         dataKey="value"
                       >
                         {data.riskData.map((entry, index) => (
@@ -356,9 +407,10 @@ export const Dashboard = () => {
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          borderRadius: "8px",
-                          border: "none",
-                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                          borderRadius: "12px",
+                          border: "1px solid #7DA0CA40",
+                          boxShadow: "0 6px 16px -2px rgb(0 0 0 / 0.08)",
+                          backgroundColor: "#ffffff",
                         }}
                       />
                       <Legend verticalAlign="bottom" height={36} />

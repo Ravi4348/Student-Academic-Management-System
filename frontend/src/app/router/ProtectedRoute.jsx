@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 export const ProtectedRoute = ({ allowedRoles }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -25,8 +26,12 @@ export const ProtectedRoute = ({ allowedRoles }) => {
   }
 
   return (
-    <DashboardShell>
-      <Outlet />
-    </DashboardShell>
+    <ErrorBoundary>
+      <DashboardShell>
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
+      </DashboardShell>
+    </ErrorBoundary>
   );
 };

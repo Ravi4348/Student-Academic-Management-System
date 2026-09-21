@@ -9,6 +9,15 @@ import { userService } from "@/services/userService";
 import { studentService } from "@/services/studentService";
 import { Plus, Loader2, Pencil, Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { RolePermissions } from "./RolePermissions";
 
 export const Users = () => {
@@ -233,181 +242,170 @@ export const Users = () => {
       </TabsContent>
 
       {/* User Creation/Edit Modal */}
-      {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold">
-                {editId ? "Edit User" : "Create New User"}
-              </h2>
-              <button
-                onClick={() => !isSaving && setIsDialogOpen(false)}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editId ? "Edit User" : "Create New User"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+            {saveError && (
+              <div className="p-3 bg-rose-50 text-rose-600 text-sm font-medium rounded-md border border-rose-100">
+                {saveError}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>
+                Role <span className="text-rose-500">*</span>
+              </Label>
+              <select
+                value={formData.role}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    role: e.target.value,
+                    studentId: "",
+                  })
+                }
+                className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground text-sm"
                 disabled={isSaving}
-                className="text-slate-400 hover:text-slate-600"
               >
-                ×
-              </button>
+                <option value="STUDENT">Student</option>
+                <option value="CTPO">CTPO</option>
+                <option value="HOD">HOD</option>
+                <option value="PRINCIPAL">Principal</option>
+                <option value="COORDINATOR">Coordinator</option>
+                <option value="ADMIN">Admin</option>
+              </select>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {saveError && (
-                <div className="p-3 bg-rose-50 text-rose-600 text-sm font-medium rounded-md border border-rose-100">
-                  {saveError}
-                </div>
-              )}
-
+            {formData.role === "STUDENT" && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Role <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={formData.role}
+                <Label>
+                  Link Student Record <span className="text-rose-500">*</span>
+                </Label>
+                <Input
+                  list="student-list"
+                  value={formData.studentId}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      role: e.target.value,
-                      studentId: "",
-                    })
+                    setFormData({ ...formData, studentId: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                  disabled={isSaving}
-                >
-                  <option value="STUDENT">Student</option>
-                  <option value="CTPO">CTPO</option>
-                  <option value="HOD">HOD</option>
-                  <option value="PRINCIPAL">Principal</option>
-                  <option value="COORDINATOR">Coordinator</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
-              </div>
-
-              {formData.role === "STUDENT" && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">
-                    Link Student Record <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    list="student-list"
-                    value={formData.studentId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, studentId: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                    placeholder="Search by Roll No or Name..."
-                    disabled={isSaving}
-                  />
-
-                  <datalist id="student-list">
-                    {students.map((s) => (
-                      <option key={s._id} value={s._id}>
-                        {s.name} ({s.rollNo})
-                      </option>
-                    ))}
-                  </datalist>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Select the exact Object ID from the dropdown list to link
-                    the account properly.
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Username / Email <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. john@student.kiet.edu"
+                  placeholder="Search by Roll No or Name..."
                   disabled={isSaving}
                 />
+
+                <datalist id="student-list">
+                  {students.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name} ({s.rollNo})
+                    </option>
+                  ))}
+                </datalist>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select the exact Object ID from the dropdown list to link
+                  the account properly.
+                </p>
               </div>
+            )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Password{" "}
-                  {editId ? "" : <span className="text-rose-500">*</span>}
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary pr-10"
-                    placeholder={
-                      editId
-                        ? "Leave blank to keep unchanged"
-                        : "Minimum 6 characters"
-                    }
-                    disabled={isSaving}
-                  />
+            <div className="space-y-2">
+              <Label>
+                Username / Email <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                type="text"
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
+                }
+                placeholder="e.g. john@student.kiet.edu"
+                disabled={isSaving}
+              />
+            </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label>
+                Password{" "}
+                {editId ? "" : <span className="text-rose-500">*</span>}
+              </Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="pr-10"
+                  placeholder={
+                    editId
+                      ? "Leave blank to keep unchanged"
+                      : "Minimum 6 characters"
+                  }
+                  disabled={isSaving}
+                />
 
-              {editId && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">
-                    Status <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                    disabled={isSaving}
-                  >
-                    <option value="ACTIVE">Active</option>
-                    <option value="INACTIVE">Inactive</option>
-                    <option value="SUSPENDED">Suspended</option>
-                  </select>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4 border-t mt-4">
                 <button
                   type="button"
-                  onClick={() => setIsDialogOpen(false)}
-                  disabled={isSaving}
-                  className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {isSaving
-                    ? "Saving..."
-                    : editId
-                      ? "Update User"
-                      : "Create User"}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+
+            {editId && (
+              <div className="space-y-2">
+                <Label>
+                  Status <span className="text-rose-500">*</span>
+                </Label>
+                <select
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground text-sm"
+                  disabled={isSaving}
+                >
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                  <option value="SUSPENDED">Suspended</option>
+                </select>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-4 border-t mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+              >
+                {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isSaving
+                  ? "Saving..."
+                  : editId
+                    ? "Update User"
+                    : "Create User"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Tabs>
   );
 };

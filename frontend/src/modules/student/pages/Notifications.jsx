@@ -173,8 +173,8 @@ export const Notifications = () => {
                 onClick={() => handleNavigate(path, notification)}
                 className={`cursor-pointer bg-white rounded-xl border p-5 sm:p-6 transition-all hover:bg-slate-50 ${
                   isRead
-                    ? "border-slate-200 shadow-sm opacity-75 hover:opacity-100"
-                    : "border-indigo-300 shadow-md ring-1 ring-indigo-50"
+                    ? "border-[#7DA0CA]/35 shadow-xs opacity-80 hover:opacity-100"
+                    : "border-[#5483B3] shadow-md ring-1 ring-[#C1E8FF]/50"
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -185,7 +185,7 @@ export const Notifications = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
                       <h4
-                        className={`text-base font-semibold ${isRead ? "text-slate-700" : "text-slate-900"}`}
+                        className={`text-base font-semibold ${isRead ? "text-slate-700" : "text-[#021024]"}`}
                       >
                         {notification.title}
                       </h4>
@@ -211,7 +211,7 @@ export const Notifications = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-slate-50 text-slate-700 rounded-md hover:bg-slate-100 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#f4f9fd] text-[#052659] border border-[#7DA0CA]/30 rounded-lg hover:bg-[#C1E8FF]/30 transition-colors"
                           >
                             <Bell className="w-4 h-4" /> View PDF
                           </a>
@@ -219,7 +219,7 @@ export const Notifications = () => {
                             onClick={(e) =>
                               handleDownloadNotice(e, notification.referenceId)
                             }
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#C1E8FF]/40 text-[#052659] border border-[#5483B3]/30 rounded-lg hover:bg-[#C1E8FF]/70 transition-colors"
                           >
                             <Download className="w-4 h-4" /> Download PDF
                           </button>
@@ -232,7 +232,7 @@ export const Notifications = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-rose-50 text-rose-700 rounded-md hover:bg-rose-100 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors"
                         >
                           <Bell className="w-4 h-4" /> Watch Video
                         </a>
@@ -241,7 +241,7 @@ export const Notifications = () => {
                       {!isRead && (
                         <button
                           onClick={(e) => handleMarkRead(e, notification._id)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
                         >
                           <Check className="w-4 h-4" /> Mark as read
                         </button>

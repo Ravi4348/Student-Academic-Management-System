@@ -241,6 +241,20 @@ export const SystemConfiguration = () => {
                   data={riskByYearData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
+                  <defs>
+                    <linearGradient id="adminLowRiskGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#34d399" />
+                      <stop offset="100%" stopColor="#065f46" />
+                    </linearGradient>
+                    <linearGradient id="adminMedRiskGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#92400e" />
+                    </linearGradient>
+                    <linearGradient id="adminHighRiskGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#fb7185" />
+                      <stop offset="100%" stopColor="#9f1239" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
@@ -272,20 +286,20 @@ export const SystemConfiguration = () => {
                   <Bar
                     dataKey="LOW"
                     name="Low Risk"
-                    fill="#10b981"
-                    radius={[4, 4, 0, 0]}
+                    fill="url(#adminLowRiskGrad)"
+                    radius={[6, 6, 0, 0]}
                   />
                   <Bar
                     dataKey="MEDIUM"
                     name="Medium Risk"
-                    fill="#f59e0b"
-                    radius={[4, 4, 0, 0]}
+                    fill="url(#adminMedRiskGrad)"
+                    radius={[6, 6, 0, 0]}
                   />
                   <Bar
                     dataKey="HIGH"
                     name="High Risk"
-                    fill="#ef4444"
-                    radius={[4, 4, 0, 0]}
+                    fill="url(#adminHighRiskGrad)"
+                    radius={[6, 6, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>

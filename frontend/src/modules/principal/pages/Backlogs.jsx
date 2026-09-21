@@ -19,6 +19,20 @@ import {
   Legend,
 } from "recharts";
 
+const SubjectTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-slate-200 shadow-sm rounded-lg max-w-xs">
+        <p className="font-medium text-slate-800 mb-1">{label}</p>
+        <p className="text-sm font-bold text-violet-600">
+          Active Backlog Subjects: {payload[0].value}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export const Backlogs = () => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,20 +103,6 @@ export const Backlogs = () => {
     return text.length > length ? text.substring(0, length) + "..." : text;
   };
 
-  const SubjectTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-slate-200 shadow-sm rounded-lg max-w-xs">
-          <p className="font-medium text-slate-800 mb-1">{label}</p>
-          <p className="text-sm font-bold text-violet-600">
-            Active Backlog Subjects: {payload[0].value}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <>
       <PageHeader
@@ -152,11 +152,18 @@ export const Backlogs = () => {
                   No backlog data available.
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart
                     data={data.branchDist}
                     margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                   >
+                    <defs>
+                      <linearGradient id="pBranchBacklogGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0090FF" stopOpacity={0.95} />
+                        <stop offset="60%" stopColor="#0A3670" stopOpacity={0.95} />
+                        <stop offset="100%" stopColor="#052659" stopOpacity={1} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
@@ -176,15 +183,15 @@ export const Backlogs = () => {
                     <Tooltip
                       cursor={{ fill: "#f8fafc" }}
                       contentStyle={{
-                        borderRadius: "8px",
-                        border: "none",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                        borderRadius: "12px",
+                        border: "1px solid #7DA0CA40",
+                        boxShadow: "0 6px 16px -2px rgb(0 0 0 / 0.08)",
                       }}
                     />
                     <Bar
                       dataKey="value"
-                      fill="#f43f5e"
-                      radius={[4, 4, 0, 0]}
+                      fill="url(#pBranchBacklogGrad)"
+                      radius={[6, 6, 0, 0]}
                       name="Active Backlogs"
                     />
                   </BarChart>
@@ -197,15 +204,21 @@ export const Backlogs = () => {
               description="Active backlogs distributed across cohorts"
             >
               {data.yearDist.every((y) => y.value === 0) ? (
-                <div className="flex h-[300px] items-center justify-center text-slate-500">
+                <div className="flex h-[260px] items-center justify-center text-slate-500">
                   No backlog data available.
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart
                     data={data.yearDist}
                     margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                   >
+                    <defs>
+                      <linearGradient id="pYearBacklogGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#5483B3" stopOpacity={0.95} />
+                        <stop offset="100%" stopColor="#052659" stopOpacity={1} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
@@ -225,15 +238,15 @@ export const Backlogs = () => {
                     <Tooltip
                       cursor={{ fill: "#f8fafc" }}
                       contentStyle={{
-                        borderRadius: "8px",
-                        border: "none",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                        borderRadius: "12px",
+                        border: "1px solid #7DA0CA40",
+                        boxShadow: "0 6px 16px -2px rgb(0 0 0 / 0.08)",
                       }}
                     />
                     <Bar
                       dataKey="value"
-                      fill="#f59e0b"
-                      radius={[4, 4, 0, 0]}
+                      fill="url(#pYearBacklogGrad)"
+                      radius={[6, 6, 0, 0]}
                       name="Active Backlogs"
                     />
                   </BarChart>
@@ -258,6 +271,12 @@ export const Backlogs = () => {
                     margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                     layout="vertical"
                   >
+                    <defs>
+                      <linearGradient id="pSubjBacklogGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#052659" />
+                        <stop offset="100%" stopColor="#0090FF" />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       horizontal={false}
@@ -284,8 +303,8 @@ export const Backlogs = () => {
                     />
                     <Bar
                       dataKey="value"
-                      fill="#8b5cf6"
-                      radius={[0, 4, 4, 0]}
+                      fill="url(#pSubjBacklogGrad)"
+                      radius={[0, 6, 6, 0]}
                       name="Active Backlogs"
                     />
                   </BarChart>
@@ -298,15 +317,25 @@ export const Backlogs = () => {
               description="Status of backlogs across semesters"
             >
               {data.semesterDist.length === 0 ? (
-                <div className="flex h-[300px] items-center justify-center text-slate-500">
+                <div className="flex h-[260px] items-center justify-center text-slate-500">
                   No backlog data available.
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart
                     data={data.semesterDist}
                     margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                   >
+                    <defs>
+                      <linearGradient id="pSemActiveGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0090FF" stopOpacity={0.95} />
+                        <stop offset="100%" stopColor="#052659" stopOpacity={1} />
+                      </linearGradient>
+                      <linearGradient id="pSemClearedGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#34d399" />
+                        <stop offset="100%" stopColor="#065f46" />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
@@ -326,24 +355,24 @@ export const Backlogs = () => {
                     <Tooltip
                       cursor={{ fill: "#f8fafc" }}
                       contentStyle={{
-                        borderRadius: "8px",
-                        border: "none",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                        borderRadius: "12px",
+                        border: "1px solid #7DA0CA40",
+                        boxShadow: "0 6px 16px -2px rgb(0 0 0 / 0.08)",
                       }}
                     />
                     <Legend />
                     <Bar
                       dataKey="active"
                       stackId="a"
-                      fill="#f43f5e"
+                      fill="url(#pSemActiveGrad)"
                       name="Active"
                     />
                     <Bar
                       dataKey="cleared"
                       stackId="a"
-                      fill="#10b981"
+                      fill="url(#pSemClearedGrad)"
                       name="Cleared"
-                      radius={[4, 4, 0, 0]}
+                      radius={[6, 6, 0, 0]}
                     />
                   </BarChart>
                 </ResponsiveContainer>

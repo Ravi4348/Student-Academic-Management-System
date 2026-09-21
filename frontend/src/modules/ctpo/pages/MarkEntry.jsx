@@ -29,10 +29,6 @@ export const MarkEntry = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState(null);
 
-  useEffect(() => {
-    loadDataset();
-  }, [examType]);
-
   const loadDataset = async () => {
     setIsLoading(true);
     setError(null);
@@ -79,6 +75,10 @@ export const MarkEntry = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadDataset();
+  }, [examType]);
 
   const handleMarkChange = (studentId, subjectId, field, value) => {
     setMarksState((prev) => ({
