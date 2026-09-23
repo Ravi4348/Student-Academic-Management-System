@@ -19,9 +19,11 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
+import { useActiveAcademicSession } from "@/hooks/useActiveAcademicSession";
 
 export const Sidebar = ({ className }) => {
   const { user } = useAuth();
+  const activeSessionString = useActiveAcademicSession();
   const role = user?.role || "STUDENT";
 
   // Navigation configurations mapped precisely per academic role
@@ -353,7 +355,7 @@ export const Sidebar = ({ className }) => {
             </span>
           </div>
           <p className="text-white text-[11px] font-bold mt-1 tracking-tight">
-            Academic Year 2025–2026
+            Academic Year {activeSessionString}
           </p>
         </div>
       </div>

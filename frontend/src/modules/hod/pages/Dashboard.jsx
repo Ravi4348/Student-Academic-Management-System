@@ -29,8 +29,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { useActiveAcademicSession } from "@/hooks/useActiveAcademicSession";
+
 export const Dashboard = () => {
   const { user } = useAuth();
+  const activeSessionString = useActiveAcademicSession();
   const [filters, setFilters] = useState({});
   const [kpis, setKpis] = useState(null);
   const [trends, setTrends] = useState([]);
@@ -90,16 +93,17 @@ export const Dashboard = () => {
         title="HOD Academic Profile"
         icon={GraduationCap}
         name={
-          user?.firstName
+          user?.fullName ||
+          (user?.firstName
             ? `${user.firstName} ${user.lastName || ""}`.trim()
-            : user?.username || "Head of Department"
+            : user?.username || "Head of Department")
         }
         avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
-        fallbackText={(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "H").toUpperCase()}
+        fallbackText={(user?.fullName?.charAt(0) || user?.firstName?.charAt(0) || user?.username?.charAt(0) || "H").toUpperCase()}
         badges={[
           { label: "Department Executive Leadership" },
           { label: scopeYear ? `Supervising: Year ${scopeYear}` : "All Department Cohorts" },
-          { label: "Academic Session 2025–2026", highlight: true, dotColor: "bg-emerald-400" },
+          { label: `Academic Session ${activeSessionString}`, highlight: true, dotColor: "bg-emerald-400" },
         ]}
         visionTitle="Department Vision"
         visionWords={["Lead", "Innovate", "Excel"]}

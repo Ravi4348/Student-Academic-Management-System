@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { StylePreview } from "./pages/StylePreview";
 import { Login } from "./pages/Login";
 import { Forbidden } from "./pages/Forbidden";
 import { ProtectedRoute } from "./app/router/ProtectedRoute";
@@ -79,7 +78,6 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/forbidden" element={<Forbidden />} />
-          <Route path="/preview" element={<StylePreview />} />
 
           {/* Root Redirect - dynamic based on auth and role */}
           <Route path="/" element={<RootRedirect />} />

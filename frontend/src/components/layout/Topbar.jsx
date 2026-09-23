@@ -109,7 +109,7 @@ export const Topbar = ({ onMenuToggle, title = "Dashboard" }) => {
   const userIdentifier =
     user?.role === "STUDENT" && studentProfile?.rollNo
       ? studentProfile.rollNo
-      : user?.username || "USER";
+      : displayName;
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#7DA0CA]/35 bg-gradient-to-r from-[#f0f6fc]/95 via-[#eaf2fa]/95 to-[#f3f8fd]/95 backdrop-blur-md px-3.5 sm:px-5 shadow-2xs">

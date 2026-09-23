@@ -32,8 +32,12 @@ const COLORS = {
   "AT-RISK": "#dc2626", // red-600
 };
 
+import { useActiveAcademicSession } from "@/hooks/useActiveAcademicSession";
+
 export const CtpoDashboard = () => {
   const { user } = useAuth();
+  const activeSessionString = useActiveAcademicSession();
+  const scopeYear = user?.scope?.year;
   const [metrics, setMetrics] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -112,16 +116,17 @@ export const CtpoDashboard = () => {
         title="CTPO Academic Profile"
         icon={Users}
         name={
-          user?.firstName
+          user?.fullName ||
+          (user?.firstName
             ? `${user.firstName} ${user.lastName || ""}`.trim()
-            : user?.username || "Class Teacher & Placement Officer"
+            : user?.username || "Class Teacher & Placement Officer")
         }
         avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
-        fallbackText={(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "C").toUpperCase()}
+        fallbackText={(user?.fullName?.charAt(0) || user?.firstName?.charAt(0) || user?.username?.charAt(0) || "C").toUpperCase()}
         badges={[
-          { label: "Class Coordinator & Placement" },
+          { label: scopeYear ? `Supervising / Year: Year ${scopeYear}` : "Class Coordinator & Placement" },
           { label: `Enrolled: ${metrics.totalStudents || 0} Students` },
-          { label: "Academic Session 2025–2026", highlight: true, dotColor: "bg-emerald-400" },
+          { label: `Academic Session ${activeSessionString}`, highlight: true, dotColor: "bg-emerald-400" },
         ]}
         visionTitle="CTPO Mandate"
         visionWords={["Mentor", "Guide", "Place"]}

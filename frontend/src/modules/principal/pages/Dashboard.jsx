@@ -25,8 +25,11 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 
+import { useActiveAcademicSession } from "@/hooks/useActiveAcademicSession";
+
 export const Dashboard = () => {
   const { user } = useAuth();
+  const activeSessionString = useActiveAcademicSession();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -111,16 +114,17 @@ export const Dashboard = () => {
         title="Principal Academic Profile"
         icon={Users}
         name={
-          user?.firstName
+          user?.fullName ||
+          (user?.firstName
             ? `${user.firstName} ${user.lastName || ""}`.trim()
-            : user?.username || "Principal & Executive Director"
+            : user?.username || "Principal & Executive Director")
         }
         avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
-        fallbackText={(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "P").toUpperCase()}
+        fallbackText={(user?.fullName?.charAt(0) || user?.firstName?.charAt(0) || user?.username?.charAt(0) || "P").toUpperCase()}
         badges={[
           { label: "Institution Executive Leadership" },
           { label: `Campus Strength: ${data?.totalStudents || 0} Students` },
-          { label: "Academic Session 2025–2026", highlight: true, dotColor: "bg-emerald-400" },
+          { label: `Academic Session ${activeSessionString}`, highlight: true, dotColor: "bg-emerald-400" },
         ]}
         visionTitle="Institutional Vision"
         visionWords={["Govern", "Elevate", "Achieve"]}

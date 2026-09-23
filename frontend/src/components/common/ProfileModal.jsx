@@ -125,12 +125,18 @@ export const ProfileModal = ({ isOpen, onClose, user, studentProfile }) => {
           : `${newAvatarId}?t=${Date.now()}`
         : "";
 
+      const nameParts = formData.fullName.trim().split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
       const storedUser = JSON.parse(sessionStorage.getItem("user") || "{}");
       sessionStorage.setItem(
         "user",
         JSON.stringify({
           ...storedUser,
           ...formData,
+          firstName,
+          lastName,
           avatarFileId: updatedUser?.avatarFileId,
           avatar: updatedUser?.avatar,
         }),
@@ -138,6 +144,8 @@ export const ProfileModal = ({ isOpen, onClose, user, studentProfile }) => {
       try {
         Object.assign(user, {
           fullName: formData.fullName,
+          firstName,
+          lastName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
           avatarFileId: updatedUser?.avatarFileId,

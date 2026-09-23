@@ -5,7 +5,8 @@ require('dotenv').config();
 
 describe('AuditLog System', () => {
   beforeAll(async () => {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/academic_engagement_db');
+    process.env.JWT_SECRET = 'test_secret';
+    await mongoose.connect(process.env.MONGODB_URI_TEST || 'mongodb://localhost:27017/academic_engagement_db_test_audit');
   }, 15000);
 
   afterAll(async () => {

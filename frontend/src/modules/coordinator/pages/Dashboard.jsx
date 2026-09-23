@@ -20,8 +20,11 @@ import {
 } from "recharts";
 import { getAvatarUrl } from "@/utils/urlUtils";
 
+import { useActiveAcademicSession } from "@/hooks/useActiveAcademicSession";
+
 export const Dashboard = () => {
   const { user } = useAuth();
+  const activeSessionString = useActiveAcademicSession();
   const [remedialStats, setRemedialStats] = useState([]);
   const [guestStats, setGuestStats] = useState([]);
   const [kpis, setKpis] = useState(null);
@@ -79,16 +82,17 @@ export const Dashboard = () => {
         title="Coordinator Academic Profile"
         icon={Users}
         name={
-          user?.firstName
+          user?.fullName ||
+          (user?.firstName
             ? `${user.firstName} ${user.lastName || ""}`.trim()
-            : user?.username || "Academic Support Coordinator"
+            : user?.username || "Academic Support Coordinator")
         }
         avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
-        fallbackText={(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "C").toUpperCase()}
+        fallbackText={(user?.fullName?.charAt(0) || user?.firstName?.charAt(0) || user?.username?.charAt(0) || "C").toUpperCase()}
         badges={[
           { label: "Academic Support & Remedial Coordination" },
           { label: `Enrolled: ${kpis?.totalStudents || 0} Students` },
-          { label: "Academic Session 2025–2026", highlight: true, dotColor: "bg-emerald-400" },
+          { label: `Academic Session ${activeSessionString}`, highlight: true, dotColor: "bg-emerald-400" },
         ]}
         visionTitle="Coordination Goal"
         visionWords={["Support", "Remedy", "Progress"]}

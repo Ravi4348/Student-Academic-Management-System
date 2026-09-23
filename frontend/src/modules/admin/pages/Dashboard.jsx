@@ -56,12 +56,13 @@ export const Dashboard = () => {
         title="Admin Academic Profile"
         icon={Building}
         name={
-          user?.firstName
+          user?.fullName ||
+          (user?.firstName
             ? `${user.firstName} ${user.lastName || ""}`.trim()
-            : user?.username || "System Administrator"
+            : user?.username || "System Administrator")
         }
         avatar={getAvatarUrl(user?.avatarFileId || user?.avatar)}
-        fallbackText={(user?.firstName?.charAt(0) || user?.username?.charAt(0) || "A").toUpperCase()}
+        fallbackText={(user?.fullName?.charAt(0) || user?.firstName?.charAt(0) || user?.username?.charAt(0) || "A").toUpperCase()}
         badges={[
           { label: "Central System Administration" },
           { label: `Total Campuses: ${data?.kpis?.totalCampuses || 0}` },
