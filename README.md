@@ -293,6 +293,7 @@ project/
 
 ## 38. Environment Configuration
 See `.env.example` in both `frontend/` and `backend/`. Ensure `MONGODB_URI`, `JWT_SECRET`, and frontend `VITE_API_BASE_URL` are set.
+For the Python Result Processor, set the `TESSERACT_CMD` environment variable if Tesseract OCR is not installed in the system PATH.
 
 ## 39. Local Setup
 1. **Database:** Start MongoDB.

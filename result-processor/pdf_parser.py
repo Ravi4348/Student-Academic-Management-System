@@ -138,15 +138,27 @@ def process_pdf(pdf_path):
             import pytesseract
             from PIL import Image
             
-            # Setup tesseract path on Windows if needed
-            tesseract_paths = [
-                r"C:\Program Files\Tesseract-OCR\tesseract.exe",
-                r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
-            ]
-            for t_path in tesseract_paths:
-                if os.path.exists(t_path):
-                    pytesseract.pytesseract.tesseract_cmd = t_path
-                    break
+            import shutil
+            
+            # Resolve Tesseract path: 1. Env Var, 2. PATH, 3. Windows Fallback
+            tesseract_cmd = os.environ.get('TESSERACT_CMD')
+            if not tesseract_cmd:
+                tesseract_cmd = shutil.which('tesseract')
+                
+            if not tesseract_cmd and os.name == 'nt':
+                win_paths = [
+                    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+                    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
+                ]
+                for wp in win_paths:
+                    if os.path.exists(wp):
+                        tesseract_cmd = wp
+                        break
+                        
+            if not tesseract_cmd:
+                return {"status": "error", "message": "Tesseract OCR executable not found. Please install Tesseract or set TESSERACT_CMD environment variable."}
+                
+            pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
                     
             doc = fitz.open(pdf_path)
             for i, page in enumerate(doc):
@@ -165,7 +177,7 @@ def process_pdf(pdf_path):
         except Exception as e:
             # If tesseract is not installed, it will throw an error
             if "tesseract is not installed" in str(e).lower() or "not found" in str(e).lower():
-                return {"status": "error", "message": "Tesseract OCR is not installed. Please install Tesseract-OCR on Windows and add it to PATH to parse image-based PDFs."}
+                return {"status": "error", "message": "Tesseract OCR is not installed. Please install Tesseract OCR and ensure it is in PATH, or set the TESSERACT_CMD environment variable."}
             return {"status": "error", "message": f"OCR failed: {str(e)}"}
             
     if not all_text.strip():
