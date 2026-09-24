@@ -328,3 +328,22 @@ Run `cd backend && npm test` for Jest-based API test coverage. Run `cd frontend 
 ![HOD Dashboard](docs/screenshots/hod-dashboard.png)
 ![Coordinator Dashboard](docs/screenshots/coordinator-dashboard.png)
 
+## 45. Deployment (Render & Vercel)
+
+### Backend (Render Web Service)
+1. In the Render dashboard, create a new Web Service.
+2. Connect this repository and set the **Root Directory** to `.` (the project root).
+3. Set the Environment to **Docker**.
+4. Set the **Dockerfile Path** to `Dockerfile`.
+5. Provide the necessary environment variables in the Render dashboard:
+   - `MONGODB_URI` (Your MongoDB Atlas connection string)
+   - `JWT_SECRET` (A secure random string)
+   - `PORT` (Provided by Render automatically, usually defaults to 10000)
+
+### Frontend (Vercel)
+1. Create a new project in Vercel and connect the repository.
+2. Set the **Framework Preset** to `Vite` (or `Other`).
+3. Set the **Root Directory** to `frontend`.
+4. Ensure the Build Command is `npm run build` and the Output Directory is `dist`.
+5. Set the `VITE_API_BASE_URL` environment variable to the live URL of your Render backend.
+
