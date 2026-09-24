@@ -1,20 +1,25 @@
-FROM node:18-bullseye-slim
+FROM node:22-bookworm-slim
 
-# Install Python, pip, Tesseract OCR, and required system libraries
+# Install Python, pip, venv, Tesseract OCR, and required system libraries
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
+    python3-venv \
     tesseract-ocr \
     libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
+
+# Set up Python virtual environment
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Set up application directory
 WORKDIR /app
 
 # Copy result-processor and install Python dependencies
 COPY result-processor /app/result-processor
-RUN pip3 install --no-cache-dir -r /app/result-processor/requirements.txt
+RUN pip install --no-cache-dir -r /app/result-processor/requirements.txt
 
 # Copy backend package files and install Node dependencies
 COPY backend/package*.json /app/backend/
